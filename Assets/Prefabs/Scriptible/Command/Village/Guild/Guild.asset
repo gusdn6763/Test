@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deef7e7c3f84b644aa9a04eba93dbcd0, type: 3}
+  m_Name: Guild
+  m_EditorClassIdentifier: 
+  commandName: "\uAE38\uB4DC"
+  status:
+    hp: 0
+    fatigue: 0
+    hungry: 0
+    time: 0
+  isCondition: 1
+  found: 0
+  childLocations:
+  - {fileID: 11400000, guid: 69ae9ff751ccf83478aaad679e09310f, type: 2}
+  - {fileID: 11400000, guid: dd1053f65e944f54c87dfcd5874d63f9, type: 2}
+  - {fileID: 11400000, guid: 738c302e216cadd48a96eb49a43278a8, type: 2}
+  alternative: {fileID: 11400000, guid: dd1053f65e944f54c87dfcd5874d63f9, type: 2}
+  vertex: 1

@@ -12,8 +12,8 @@ public class VillageMoveData : MultiTreeData
     [Header("자식 지역들")]
     public List<VillageMoveData> childLocations = new List<VillageMoveData>();
 
-    [Header("대체 이동지역")]
-    public VillageMoveData alternative;
+    [Header("대체 지역 명칭")]
+    public string showName;
 
     public int vertex = 0;
 }

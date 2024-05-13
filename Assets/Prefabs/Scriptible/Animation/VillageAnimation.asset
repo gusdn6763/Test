@@ -14,16 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   appearanceAnimation:
   - animationString:
-    - scale
+    - scale d=-0.4
     waitForNormalChars: 0
     appearanceAnimationType: 0
   - animationString:
-    - fade d=1
+    - fade d=-0.4
     waitForNormalChars: 0
     appearanceAnimationType: 1
   behaviorAnimation: []
-  disAppearanceAnimation:
-  - animationString:
-    - fade d=1
-    waitForNormalChars: 0
-    disAppearanceAnimationType: 0
+  disAppearanceAnimation: []

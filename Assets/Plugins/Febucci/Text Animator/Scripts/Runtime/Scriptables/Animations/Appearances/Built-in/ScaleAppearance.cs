@@ -17,12 +17,12 @@ namespace Febucci.UI.Effects
 
         public override void ApplyEffectTo(ref MyCharacterData character, RectTransform rect)
         {
-            float timePassed = timeMode.GetTime(character.appearanceTime, character.appearanceTime, character.index);
+            float timePassed = timeMode.GetTime(character.passedTime, character.passedTime, character.index);
 
             if (timePassed < 0)
                 return;
 
-            float time = Tween.EaseInOut(character.appearanceTime / duration);
+            float time = Tween.EaseInOut(character.passedTime / duration);
 
             if (time < 1)
             {
@@ -30,6 +30,8 @@ namespace Febucci.UI.Effects
                 float round = Mathf.Floor(weight * 100f) / 100f;
                 rect.localScale = new Vector3(round, round, round);
             }
+            else
+                rect.localScale = Vector3.one;
         }
     }
 }

@@ -380,18 +380,6 @@ namespace Febucci.UI.Core
 
         #region Default Tags
 
-        public struct DefaultRegion
-        {
-            public string[] tagWords;
-            public AnimationRegion region;
-
-            public DefaultRegion(string tagID, VisibilityMode visibilityMode, AnimationScriptableBase scriptable, string[] tagWords)
-            {
-                this.tagWords = tagWords;
-                this.region = new AnimationRegion(tagID, visibilityMode, scriptable);
-            }
-        }
-
         [SerializeField] string[] defaultAppearancesTags = new []{"size"};
         /// <summary>
         /// Fallback/Constant tags that will be applied to the entire text, if no other tags are found, based on the <see cref="defaultTagsMode"/> value.

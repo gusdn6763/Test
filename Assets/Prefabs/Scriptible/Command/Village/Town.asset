@@ -18,11 +18,11 @@ MonoBehaviour:
     fatigue: 0
     hungry: 0
     time: 0
-  isCondition: 1
+  isCondition: 0
   found: 0
   childLocations:
   - {fileID: 11400000, guid: 5dc056b515d6ad4418c56d620a91224b, type: 2}
-  - {fileID: 11400000, guid: 2eab4a73889e0d44eb2f79c92d7d2164, type: 2}
+  - {fileID: 11400000, guid: 0713c509efc300c438c9ad8f7c72eda5, type: 2}
   - {fileID: 11400000, guid: a1549f9dde257fb4ab3202e2a9ff583e, type: 2}
-  alternative: {fileID: 0}
+  showName: 
   vertex: 0

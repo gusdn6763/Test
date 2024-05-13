@@ -34,6 +34,8 @@ public struct BehaviorAnimationScriptible
 
     [Header("애니메이션 타입")]
     public BehaviorAnimationType behaviorAnimationType;
+
+    public bool isLoop;
 }
 
 public enum DisAppearanceAnimationType

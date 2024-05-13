@@ -21,16 +21,14 @@ namespace Febucci.UI.Effects
             if (character.passedTime <= duration)
             {
                 float t = character.passedTime / duration;
-                float y = Mathf.Sin(t * Mathf.PI) * amplitude * character.uniformIntensity;
-
                 for (int i = 0; i < character.current.positions.Length; i++)
                 {
-                    character.current.positions[i] = Vector3.Lerp(character.init.positions[i], character.source.positions[i] + Vector3.up * y, t);
+                    character.current.positions[i] = Vector3.Lerp(character.currentBefore.positions[i], character.current.positions[i], t);
                 }
             }
             else
             {
-                character.ResetPositions();
+                character.SaveBeforePositions();
             }
         }
     }

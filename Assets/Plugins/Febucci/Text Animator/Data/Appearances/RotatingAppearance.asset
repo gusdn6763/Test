@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 465a2951870a6954d8205f9c58a546de, type: 3}
   m_Name: RotatingAppearance
   m_EditorClassIdentifier: 
+  baseDuration: 0.5
   tagID: rot
-  baseDuration: 0.7
   baseTargetAngle: 50

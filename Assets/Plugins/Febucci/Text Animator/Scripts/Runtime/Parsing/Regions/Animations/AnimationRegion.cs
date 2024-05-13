@@ -5,7 +5,17 @@ using Febucci.UI.Effects;
 
 namespace Febucci.UI.Core.Parsing
 {
-    
+    public struct DefaultRegion
+    {
+        public string[] tagWords;
+        public AnimationRegion region;
+
+        public DefaultRegion(string tagID, VisibilityMode visibilityMode, AnimationScriptableBase scriptable, string[] tagWords)
+        {
+            this.tagWords = tagWords;
+            this.region = new AnimationRegion(tagID, visibilityMode, scriptable);
+        }
+    }
     [Flags]
     public enum VisibilityMode
     {

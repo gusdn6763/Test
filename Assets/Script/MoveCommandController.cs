@@ -29,11 +29,19 @@ public class VillageMoveCommandController : MonoBehaviour
 
     public void MoveLocation(VillageMoveCommand command)
     {
+        Player.instance.CurrentLocation = command.CommandName;
+
+        if (command.IsDisable)
+            command.IsCondition = false;
+
         //이전 지역 정보 비활성화
         if (currentMoveCommand)
         {
             currentMoveCommand.IsCondition = true;
-            currentMoveCommand.CommandListOnOff(false);
+
+            Action_Condition tmp = currentMoveCommand.GetComponent<Action_Condition>();
+            if (tmp)
+                tmp.CommandListOnOff(false);
         }
 
         List<Tuple<VillageMoveData, Status>> status = locationList.CaculateAllPathsStatusFromName(command.CommandName);
@@ -41,6 +49,9 @@ public class VillageMoveCommandController : MonoBehaviour
         for (int i = 0; i < allChildCommands.Count; i++)
         {
             VillageMoveCommand childCommand = allChildCommands[i];
+
+            if (childCommand.Found == false)
+                continue;
 
             foreach (var tuple in status)
             {
@@ -67,7 +78,7 @@ public class VillageMoveCommandController : MonoBehaviour
             Player.instance.ShowIntroduce(listTmp);
 
         currentMoveCommand = command;
-        area.VillageSetting(currentMoveCommand);
+        area.VillageSetting();
     }
 
     public bool FindLocation(string locationName)

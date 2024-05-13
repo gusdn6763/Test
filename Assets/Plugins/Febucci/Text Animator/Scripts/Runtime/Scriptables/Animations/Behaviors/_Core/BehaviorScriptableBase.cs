@@ -8,6 +8,14 @@ namespace Febucci.UI.Effects
     public abstract class BehaviorScriptableBase : AnimationScriptableBase
     {
         public override bool CanApplyEffectTo(CharacterData character, TAnimCore animator) => true;
+
+        public override bool IsBehaviorDuration() 
+        {
+            if (duration > 0)
+                return true;
+
+            return false; 
+        }
     }
 
 }

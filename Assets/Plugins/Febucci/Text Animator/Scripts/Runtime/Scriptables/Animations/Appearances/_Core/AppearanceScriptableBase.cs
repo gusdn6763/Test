@@ -11,7 +11,7 @@ namespace Febucci.UI.Effects
     {
         public override bool CanApplyEffectTo(CharacterData character, TAnimCore animator) => character.passedTime <= duration;
 
-        public override bool CanApplyEffectTo(MyCharacterData character, RectTransform rect) => character.appearanceTime <= duration;
+        public override bool CanApplyEffectTo(MyCharacterData character, RectTransform rect) => character.passedTime <= duration;
     }
 
 }

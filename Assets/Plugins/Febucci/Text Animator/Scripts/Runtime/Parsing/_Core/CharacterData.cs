@@ -68,16 +68,15 @@ namespace Febucci.UI.Core
         public int wordIndex;
         public bool isVisible;
         public float passedTime;
-        public float appearanceTime;
         public float appearancesMaxDuration;
         public float disappearancesMaxDuration;
         public float behaviorMaxDuration;
 
         public float uniformIntensity;
 
-        public MyMeshData init;
         public MyMeshData source;
         public MyMeshData current;
+        public MyMeshData currentBefore;
 
         public void ResetInfo(int i, bool resetVisibility = true)
         {
@@ -90,8 +89,8 @@ namespace Febucci.UI.Core
             //--Initializes first time only--
             if (!info.initialized)
             {
-                init.positions = new Vector3[Core.TextUtilities.verticesPerChar];
-                init.colors = new Color32[Core.TextUtilities.verticesPerChar];
+                currentBefore.positions = new Vector3[Core.TextUtilities.verticesPerChar];
+                currentBefore.colors = new Color32[Core.TextUtilities.verticesPerChar];
 
                 source.positions = new Vector3[Core.TextUtilities.verticesPerChar];
                 source.colors = new Color32[Core.TextUtilities.verticesPerChar];
@@ -137,12 +136,10 @@ namespace Febucci.UI.Core
             uniformIntensity = info.pointSize / referenceFontSize;
         }
 
-        public void ResetPositions()
+        public void SaveBeforePositions()
         {
-            for (int i = 0; i < current.positions.Length; i++)
-            {
-                current.positions[i] = init.positions[i];
-            }
+            for (int i = 0; i < source.positions.Length; i++)
+                currentBefore.positions[i] = new Vector3(current.positions[i].x, current.positions[i].y, current.positions[i].z);
         }
     }
 }

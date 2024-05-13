@@ -14,26 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   appearanceAnimation:
   - animationString:
-    - scale
+    - scale d=-0.4
     waitForNormalChars: 0
     appearanceAnimationType: 0
   - animationString:
-    - fade d=1
+    - fade d=-0.4
     waitForNormalChars: 0
     appearanceAnimationType: 1
   behaviorAnimation:
   - animationString:
     - wave a=0.03 w=0.5 f=0.3
     behaviorAnimationType: 0
+    isLoop: 1
   - animationString:
-    - revert t=2
+    - revert d=-0.4
     behaviorAnimationType: 1
-  - animationString:
-    - randomdir
-    behaviorAnimationType: 2
-  - animationString:
-    - revert
-    behaviorAnimationType: 3
+    isLoop: 0
   disAppearanceAnimation:
   - animationString: []
     waitForNormalChars: 0

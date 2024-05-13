@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a42e8d2f57514874290b7dc71a0e6cf3, type: 3}
   m_Name: ScaleAppearance
   m_EditorClassIdentifier: 
+  baseDuration: 0.5
   tagID: scale
-  baseDuration: 1
   timeMode:
     startDelay: 0
     useUniformTime: 1

@@ -5,6 +5,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class VillageArea : MonoBehaviour
 {
@@ -15,12 +16,15 @@ public class VillageArea : MonoBehaviour
     [SerializeField] private VillageMoveCommand startPosition;
 
     #region 이동 및 상호작용 관련
+    [SerializeField] protected float power = 10f;
+
     public MultiTreeCommand currentCommand;
     public Vector3 currentMousePosition;
     public MouseStatus currentMouseStatus;
-    [SerializeField] protected float power = 10f;
+
+    public MultiTreeCommand clickCommand;
     public Vector3 clickMousePosition;
-    public bool dragable = false;
+    public bool click;
     #endregion
 
     #region 레이어
@@ -34,9 +38,19 @@ public class VillageArea : MonoBehaviour
     {
         DisAbleAllVillageCommand();
 
-        startPosition.Interaction(MouseStatus.Excute);
+        startPosition.onMouseEvent.Invoke(MouseStatus.Excute);
+    }
 
-        StartCoroutine(CommandActivingCoroutine());
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+            click = true;
+
+        if (Input.GetMouseButtonUp(0) && click)
+            click = false;
+
+        CommandActivingCoroutine();
     }
 
     public void DisAbleAllVillageCommand()
@@ -48,11 +62,12 @@ public class VillageArea : MonoBehaviour
                 command.DisableAllCommandFromBottom();
     }
 
-    IEnumerator CommandActivingCoroutine()
+    public void CommandActivingCoroutine()
     {
-        while (true)
-        {
-            yield return new WaitUntil(() => AnimationManager.instance.IsAnimation == false);
+        if (AnimationManager.instance.IsAnimation)
+            return;
+
+            //yield return new WaitUntil(() => AnimationManager.instance.IsAnimation == false);
 
             if (selectCommandStack.Count > 0)
                 currentLayerMask = clickLayerMask;
@@ -62,8 +77,7 @@ public class VillageArea : MonoBehaviour
             Vector3 mousePosition = Input.mousePosition;
 
             //마우스를 빠르게 움직이면 드래그 중인 행동을 놓침.
-            //1. IMoveable 2.드래그 상태
-            if (dragable)
+            if (clickCommand is IMoveable)
             {
                 if (Input.GetMouseButton(0))
                 {
@@ -96,7 +110,7 @@ public class VillageArea : MonoBehaviour
                         {
                             if (Input.GetMouseButtonUp(0))
                                 Interaction(currentCommand, MouseStatus.Up);
-                            else if (Input.GetMouseButton(0) && currentMouseStatus != MouseStatus.Down)
+                            else if (Input.GetMouseButton(0) && clickCommand == null)
                                 Interaction(currentCommand, MouseStatus.Down);
                             else if (Input.GetMouseButton(0))
                                 Interaction(currentCommand, MouseStatus.Drag);
@@ -111,10 +125,8 @@ public class VillageArea : MonoBehaviour
                 }
             }
 
-            currentMousePosition = Input.mousePosition;
-
-            yield return null;
-        }
+        currentMousePosition = Input.mousePosition;
+        
     }
     public void StackExit()
     {
@@ -129,6 +141,7 @@ public class VillageArea : MonoBehaviour
     public void Interaction(MultiTreeCommand multiTreeCommand, MouseStatus mouseStatus)
     {
         currentMouseStatus = mouseStatus;
+        Debug.Log(currentMouseStatus);
 
         if (mouseStatus == MouseStatus.Enter)
         {
@@ -136,7 +149,7 @@ public class VillageArea : MonoBehaviour
             {
                 UIManager.instance.Blur(true);
                 selectCommandStack.Push(multiTreeCommand);
-                ChangeLayerRecursively(multiTreeCommand, clickLayerMask);
+                ChangeLayerRecursively(multiTreeCommand.RootCommand, clickLayerMask);
             }
             else
             {
@@ -159,25 +172,21 @@ public class VillageArea : MonoBehaviour
         }
         else if (mouseStatus == MouseStatus.Down)
         {
-            dragable = true;
+            clickCommand = multiTreeCommand;
             clickMousePosition = Input.mousePosition;
             multiTreeCommand.Interaction(mouseStatus);
         }
         else if (mouseStatus == MouseStatus.Drag)
         {
-            if (Input.mousePosition != currentMousePosition)
-                dragable = false;
-
             multiTreeCommand.Interaction(mouseStatus);
         }
         else if (mouseStatus == MouseStatus.Up)
         {
+            clickCommand = null;
             multiTreeCommand.Interaction(mouseStatus);
 
-            if (dragable)
+            if (clickMousePosition == Input.mousePosition)
                 Interaction(multiTreeCommand, MouseStatus.Excute);
-
-            dragable = false;
         }
         else if (mouseStatus == MouseStatus.Excute)
         {
@@ -201,7 +210,7 @@ public class VillageArea : MonoBehaviour
             }
             if (selectCommandStack.Count == 0)
             {
-                ChangeLayerRecursively(multiTreeCommand.GetRootCommand, defaultLayerMask);
+                ChangeLayerRecursively(multiTreeCommand.RootCommand, defaultLayerMask);
                 UIManager.instance.Blur(false);
             }
         }
@@ -222,39 +231,16 @@ public class VillageArea : MonoBehaviour
     #endregion
 
     #region 애니메이션
-    //하... 시간이 없다.
-    private Queue<IMoveable> revertList = new Queue<IMoveable>();
-    private Queue<int> onList = new Queue<int>();
-    private Queue<int> offList = new Queue<int>();
-    public void VillageSetting(VillageMoveCommand villageMoveCommand)
+    public void VillageSetting()
     {
-        StartCoroutine(VillageSettingCoroutine());
-    }
-    IEnumerator VillageSettingCoroutine()
-    {
-        List<MultiTreeCommand> parentList = new List<MultiTreeCommand>();
+        IMoveable[] commands = GetComponentsInChildren<IMoveable>(true);
+        List<MultiTreeCommand> commandList = new List<MultiTreeCommand>();
 
-        MultiTreeCommand[] commands = GetComponentsInChildren<MultiTreeCommand>(true);
+        foreach (IMoveable moveable in commands)
+            if (moveable is MultiTreeCommand command)
+                commandList.Add(command);
 
-        List<MultiTreeCommand> defaultList = new List<MultiTreeCommand>();
-        List<MultiTreeCommand> defaultDisList = new List<MultiTreeCommand>();
-
-        foreach (MultiTreeCommand command in commands)
-            if (command.ParentCommand == null)
-                parentList.Add(command);
-
-        foreach (MultiTreeCommand command in parentList)
-        {
-            if (command.IsCondition && command.isActiveAndEnabled == false)
-                defaultList.Add(command);
-            else if (command.IsCondition == false && command.isActiveAndEnabled)
-                defaultDisList.Add(command);
-        }
-
-        yield return new WaitUntil(() => AnimationManager.instance.IsAnimation == false);
-
-        AnimationManager.instance.Animation(defaultDisList, false);
-        AnimationManager.instance.InitialAnimation(defaultList);
+        StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(commandList));
     }
     #endregion
 }

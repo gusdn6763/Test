@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: deef7e7c3f84b644aa9a04eba93dbcd0, type: 3}
   m_Name: Inn
   m_EditorClassIdentifier: 
-  commandName: "\uC5EC\uAD00"
+  commandName: "\uC5EC\uAD00\uB85C\uBE44"
   status:
     hp: 0
     fatigue: 0
@@ -23,5 +23,5 @@ MonoBehaviour:
   childLocations:
   - {fileID: 11400000, guid: ea46fb20bb514564e9027c8b68a2137f, type: 2}
   - {fileID: 11400000, guid: d9d11ed7c0f37f748826425195540220, type: 2}
-  alternative: {fileID: 11400000, guid: d9d11ed7c0f37f748826425195540220, type: 2}
+  showName: 
   vertex: 5

@@ -1,7 +1,7 @@
 using Febucci.UI.Core;
 using UnityEngine;
 
-[RequireComponent(typeof(MultiTreeCommand))]
+[RequireComponent(typeof(MultiTreeCommand), typeof(AnimationHandler))]
 public abstract class Action_Command : MonoBehaviour
 {
     protected MultiTreeCommand command;
@@ -10,7 +10,10 @@ public abstract class Action_Command : MonoBehaviour
     {
         command = GetComponent<MultiTreeCommand>();
         command.onMouseEvent += MouseEvent;
+        command.onAnimationEndEvent += AnimationEvent;
     }
 
-    public abstract void MouseEvent(MouseStatus mouseStatus);
+    public virtual void MouseEvent(MouseStatus mouseStatus) { }
+
+    public virtual void AnimationEvent(MouseStatus mouseStatus) { }
 }

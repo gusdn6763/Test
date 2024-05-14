@@ -1,11 +1,5 @@
-using Febucci.UI.Core;
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class VillageArea : MonoBehaviour
 {
@@ -16,6 +10,10 @@ public class VillageArea : MonoBehaviour
     [SerializeField] private VillageMoveCommand startPosition;
 
     #region 이동 및 상호작용 관련
+    [SerializeField] private Transform wallTransform;
+    [SerializeField] private GameObject wallPrefab;
+    private List<BoxCollider> walls = new List<BoxCollider>();
+
     [SerializeField] protected float power = 10f;
 
     public MultiTreeCommand currentCommand;
@@ -24,7 +22,6 @@ public class VillageArea : MonoBehaviour
 
     public MultiTreeCommand clickCommand;
     public Vector3 clickMousePosition;
-    public bool click;
     #endregion
 
     #region 레이어
@@ -37,22 +34,15 @@ public class VillageArea : MonoBehaviour
     private void Start()
     {
         DisAbleAllVillageCommand();
-
+        CreateBoundaryColliders();
         startPosition.onMouseEvent.Invoke(MouseStatus.Excute);
     }
 
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-            click = true;
-
-        if (Input.GetMouseButtonUp(0) && click)
-            click = false;
-
-        CommandActivingCoroutine();
+        CommandActiving();
     }
-
     public void DisAbleAllVillageCommand()
     {
         MultiTreeCommand[] commands = GetComponentsInChildren<MultiTreeCommand>(true);
@@ -61,73 +51,125 @@ public class VillageArea : MonoBehaviour
             if (command.ParentCommand == null)
                 command.DisableAllCommandFromBottom();
     }
+    private void CreateBoundaryColliders()
+    {
+        // 상하좌우 경계 콜라이더 생성
+        for (int i = 0; i < 4; i++)
+        {
+            GameObject wall = Instantiate(wallPrefab, wallTransform);
+            walls.Add(wall.GetComponent<BoxCollider>());
+        }
 
-    public void CommandActivingCoroutine()
+        // 콜라이더 위치 및 크기 설정
+        SetBoundaryColliderPositions();
+    }
+    private void SetBoundaryColliderPositions()
+    {
+        Vector2 Right = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height * 0.5f, transform.position.z));
+        Vector2 Left = -Right;
+        Vector2 Top = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width * 0.5f, Screen.height));
+        Vector2 Bottom = -Top;
+
+        // 카메라의 수직 시야각 계산
+        float halfFOV = Camera.main.fieldOfView * 0.5f;
+
+        // 카메라의 수평 시야각 계산
+        float aspect = Camera.main.aspect;
+        float halfHorizontalFOV = Mathf.Atan(Mathf.Tan(halfFOV * Mathf.Deg2Rad) * aspect) * Mathf.Rad2Deg;
+
+        // 경계 거리에서의 상하좌우 범위 계산
+        float halfHeight = transform.position.z * Mathf.Tan(halfFOV * Mathf.Deg2Rad);
+        float halfWidth = transform.position.z * Mathf.Tan(halfHorizontalFOV * Mathf.Deg2Rad);
+
+        // 카메라 위치를 기준으로 경계 좌표 계산
+        Vector3 cameraPosition = Camera.main.transform.position;
+        float topBoundary = cameraPosition.y + halfHeight;
+        float bottomBoundary = cameraPosition.y - halfHeight;
+        float leftBoundary = cameraPosition.x - halfWidth;
+        float rightBoundary = cameraPosition.x + halfWidth;
+
+        int offset = 5;
+        // 상단 콜라이더 위치 및 크기 설정
+        walls[0].transform.localPosition = new Vector3(0f, topBoundary - transform.position.y + offset, 0);
+        walls[0].size = new Vector3(2f * halfWidth, offset * 2, 10f);
+
+        // 하단 콜라이더 위치 및 크기 설정
+        walls[1].transform.localPosition = new Vector3(0f, bottomBoundary - transform.position.y - offset, 0);
+        walls[1].size = new Vector3(2f * halfWidth, offset * 2, 10f);
+
+        // 좌측 콜라이더 위치 및 크기 설정
+        walls[2].transform.localPosition = new Vector3(leftBoundary - transform.position.x - offset, 0f, 0);
+        walls[2].size = new Vector3(offset * 2, 2f * halfHeight, 10f);
+
+        // 우측 콜라이더 위치 및 크기 설정
+        walls[3].transform.localPosition = new Vector3(rightBoundary - transform.position.x + offset, 0f, 0);
+        walls[3].size = new Vector3(offset * 2, 2f * halfHeight, 10f);
+    }
+
+    public void CommandActiving()
     {
         if (AnimationManager.instance.IsAnimation)
             return;
 
-            //yield return new WaitUntil(() => AnimationManager.instance.IsAnimation == false);
+        if (selectCommandStack.Count > 0)
+            currentLayerMask = clickLayerMask;
+        else
+            currentLayerMask = defaultLayerMask;
 
-            if (selectCommandStack.Count > 0)
-                currentLayerMask = clickLayerMask;
-            else
-                currentLayerMask = defaultLayerMask;
+        Vector3 mousePosition = Input.mousePosition;
 
-            Vector3 mousePosition = Input.mousePosition;
-
-            //마우스를 빠르게 움직이면 드래그 중인 행동을 놓침.
-            if (clickCommand is IRootCommand)
+        //마우스를 빠르게 움직이면 드래그 중인 행동을 놓침.
+        if (clickCommand is IRootCommand)
+        {
+            if (Input.GetMouseButton(0))
             {
-                if (Input.GetMouseButton(0))
-                {
-                    (currentCommand as IRootCommand).SetPower(mousePosition - currentMousePosition);
-                    Interaction(currentCommand, MouseStatus.Drag);
-                }
-                else
-                    Interaction(currentCommand, MouseStatus.Up);
+                (currentCommand as IRootCommand).SetPower(mousePosition - currentMousePosition);
+                Interaction(currentCommand, MouseStatus.Drag);
             }
             else
+                Interaction(currentCommand, MouseStatus.Up);
+        }
+        else
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, currentLayerMask))
             {
-                RaycastHit hit;
-                Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-                if (Physics.Raycast(ray, out hit, Mathf.Infinity, currentLayerMask))
+                MultiTreeCommand command = hit.collider.GetComponent<MultiTreeCommand>();
+                if (command)
                 {
-                    MultiTreeCommand command = hit.collider.GetComponent<MultiTreeCommand>();
-                    if (command)
+                    //이전 행동과 다를경우
+                    if (command != currentCommand)
                     {
-                        //이전 행동과 다를경우
-                        if (command != currentCommand)
-                        {
-                            Interaction(command, MouseStatus.Enter);    //일단 Enter를 먼저 들어가야 스택이 쌓인다.
+                        Interaction(command, MouseStatus.Enter);    //일단 Enter를 먼저 들어가야 스택이 쌓인다.
 
-                            if (currentCommand) //이전 행동과 다르고 값이 있으면
-                                Interaction(currentCommand, MouseStatus.Exit);
+                        if (currentCommand) //이전 행동과 다르고 값이 있으면
+                            Interaction(currentCommand, MouseStatus.Exit);
 
-                            currentCommand = command;
-                        }
-                        else
-                        {
-                            if (Input.GetMouseButtonUp(0))
-                                Interaction(currentCommand, MouseStatus.Up);
-                            else if (Input.GetMouseButton(0) && clickCommand == null)
-                                Interaction(currentCommand, MouseStatus.Down);
-                            else if (Input.GetMouseButton(0))
-                                Interaction(currentCommand, MouseStatus.Drag);
-                        }
+                        currentCommand = command;
+                    }
+                    else
+                    {
+                        if (Input.GetMouseButtonUp(0))
+                            Interaction(currentCommand, MouseStatus.Up);
+                        else if (Input.GetMouseButton(0) && clickCommand == null)
+                            Interaction(currentCommand, MouseStatus.Down);
+                        else if (Input.GetMouseButton(0))
+                            Interaction(currentCommand, MouseStatus.Drag);
                     }
                 }
-                else if (currentCommand)
-                {
-                    // 마우스가 어떤 오브젝트와도 충돌하지 않았을 때
-                    StackExit();
-                    currentCommand = null;
-                }
             }
+            else if (currentCommand)
+            {
+                // 마우스가 어떤 오브젝트와도 충돌하지 않았을 때
+                StackExit();
+                currentCommand = null;
+            }
+        }
 
         currentMousePosition = Input.mousePosition;
-        
     }
+
     public void StackExit()
     {
         while (selectCommandStack.Count > 0)
@@ -231,7 +273,7 @@ public class VillageArea : MonoBehaviour
     #endregion
 
     #region 애니메이션
-    public void VillageSetting()
+    public void Refresh()
     {
         IRootCommand[] commands = GetComponentsInChildren<IRootCommand>(true);
         List<MultiTreeCommand> commandList = new List<MultiTreeCommand>();

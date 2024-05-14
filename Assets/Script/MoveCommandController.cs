@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class VillageMoveCommandController : MonoBehaviour
 {
-    [SerializeField] private VillageArea area;
-
     private List<VillageMoveCommand> allChildCommands = new List<VillageMoveCommand>();
     private VillageMoveCommand currentMoveCommand;
     private LocationList locationList;
@@ -53,13 +51,13 @@ public class VillageMoveCommandController : MonoBehaviour
                 command.IsCondition = false;
 
             currentMoveCommand = command;
-            area.VillageSetting();
+            GameManager.instance.currentArea.Refresh();
         }
     }
 
     public void CaculateAllMoveCommandStatus(VillageMoveCommand command)
     {
-        List<Tuple<VillageMoveData, Status>> status = locationList.CaculateAllPathsStatusFromName(command.CommandName);
+        List<Tuple<VillageMoveCommand, Status>> status = locationList.CaculateAllPathsStatusFromName(command.CommandName);
 
         for (int i = 0; i < allChildCommands.Count; i++)
         {
@@ -70,10 +68,10 @@ public class VillageMoveCommandController : MonoBehaviour
 
             foreach (var tuple in status)
             {
-                VillageMoveData location = tuple.Item1;
+                VillageMoveCommand location = tuple.Item1;
                 Status locationStatus = tuple.Item2;
 
-                if (childCommand.CommandName == location.commandName)
+                if (childCommand.CommandName == location.CommandName)
                 {
                     childCommand.MyStatus = locationStatus;
                     break;

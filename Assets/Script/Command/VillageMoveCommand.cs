@@ -3,20 +3,28 @@ using UnityEngine;
 
 public class VillageMoveCommand : VillageCommand
 {
+    [Header("찾음 여부")]
+    [SerializeField] private bool found;
+    public bool Found { get => found; set => found = value; }
+
+    [Header("보존 여부")]
+    [SerializeField] private bool saveLocation;
+    public bool SaveLocation { get => saveLocation;}
+
+    [Header("자식 지역")]
+    [SerializeField] private List<VillageMoveCommand> childLocations = new List<VillageMoveCommand>();
+    public List<VillageMoveCommand> ChildLocations { get => childLocations; }
+
+    [Header("대체 지역")]
     public VillageMoveCommand alternativeLocation;
-    public List<VillageMoveData> ChildLocations { get; private set; }
-
-    public bool Found { get; set; }
-
-    public bool SaveLocation { get; set; }
 
     public override bool IsCondition
     {
-        get { return isCondition && Found; }
+        get { return base.IsCondition && Found; }
         set
         {
-            isCondition = value;
-            if (IsFirstShow && isCondition)    //최초로 활성화가 될경우
+            base.IsCondition = value;
+            if (IsFirstShow && base.IsCondition)    //최초로 활성화가 될경우
             {
                 IsFirstShow = false;
                 IsInitCircleEnabled = true;
@@ -26,17 +34,18 @@ public class VillageMoveCommand : VillageCommand
 
     public bool IsDisable { get { return ChildCommands.Count == 0; } }
 
-    protected override void ScritibleInit()
+    public static int vertexCount = 0;
+
+    private int vertex = -1;
+
+    public int Vertex
     {
-        base.ScritibleInit();
-
-        if (multiTreeData is VillageMoveData)
+        get
         {
-            VillageMoveData villageMoveData = multiTreeData as VillageMoveData;
+            if (vertex == -1)
+                vertex = vertexCount++;
 
-            Found = villageMoveData.found;
-            ChildLocations = villageMoveData.childLocations;
-            SaveLocation = villageMoveData.saveLocation;
+            return vertex;
         }
     }
 }

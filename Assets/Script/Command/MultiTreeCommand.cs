@@ -21,11 +21,12 @@ public enum MouseStatus
     Exit,
 }
 
+[RequireComponent(typeof(AnimationHandler))]
 public abstract class MultiTreeCommand : MonoBehaviour
 {
-    [SerializeField] protected MultiTreeData multiTreeData;
     [SerializeField] protected AnimationData animationData;
 
+    protected AnimationHandler animationHandler;
     protected ListMenu listMenu;
 
     protected BoxCollider box;
@@ -34,15 +35,27 @@ public abstract class MultiTreeCommand : MonoBehaviour
     protected Rigidbody rigi;
 
     protected Vector2 padding = new Vector2(2f, 0f);
-    public string CommandName { get; private set; }
-    public Status MyStatus { get; set; }
-    protected bool isCondition = false;
+
+    [Header("소모값")]
+    [SerializeField] private Status status;
+    public Status MyStatus { get => status; set => status = value; }
+
+    [Header("명칭")]
+
+    [SerializeField] private string commandName;
+    public string CommandName { get => commandName; private set => commandName = value; }
+
+    [Header("보이기 여부")]
+
+    [SerializeField] private bool isCondition = false;
     public virtual bool IsCondition { get { return isCondition; } set { isCondition = value; } }
 
     protected virtual void Awake()
     {
-        listMenu = GetComponentInChildren<ListMenu>();
+        listMenu = GetComponentInChildren<ListMenu>(true);
+        initCircle = GetComponentInChildren<SpriteRenderer>(true);
 
+        animationHandler = GetComponent<AnimationHandler>();
         text = GetComponent<TextMeshPro>();
         rect = GetComponent<RectTransform>();
         box = GetComponent<BoxCollider>();
@@ -55,15 +68,9 @@ public abstract class MultiTreeCommand : MonoBehaviour
         else
             box.isTrigger = true;
 
-        ScritibleInit();
         TryInitializing();
     }
-    protected virtual void ScritibleInit()
-    {
-        CommandName = multiTreeData.commandName;
-        MyStatus = multiTreeData.status;
-        isCondition = multiTreeData.isCondition;
-    }
+
     void TryInitializing()
     {
         if (initialized) 
@@ -98,12 +105,18 @@ public abstract class MultiTreeCommand : MonoBehaviour
         else
             AnimateText(Time.deltaTime);
     }
+
     protected virtual void OnDisable()
     {
         StopAllCoroutines();
         IsAppearanceStart = false;
         IsDisAppearanceStart = false;
         IsBehaviorStart = false;
+    }
+
+    protected void OnMouseEnter()
+    {
+        initCircle.enabled = false;
     }
 
     #region 트리 관련
@@ -325,13 +338,17 @@ public abstract class MultiTreeCommand : MonoBehaviour
 
     #region 마우스 상호작용
     public Action<MouseStatus> onMouseEvent;
-    public abstract void Interaction(MouseStatus mouseStatus);
+    public virtual void Interaction(MouseStatus mouseStatus)
+    {
+        onMouseEvent?.Invoke(mouseStatus);
+        Player.instance.ShowPreviewStatus(status);
+        StartCoroutine(animationHandler.AnimaionCoroutine(this, mouseStatus));
+    }
 
-    protected MouseStatus currentMouseStatus;
     #endregion
 
     #region 애니메이션
-
+    public Action<MouseStatus> onAnimationEndEvent;
     public bool IsAppearanceStart { get; set; }           //생성시작
     public bool IsDisAppearanceStart { get; set; }        //사라짐시작
     public bool IsBehaviorStart { get; set; }             //행동애니메이션 시작
@@ -930,7 +947,17 @@ public abstract class MultiTreeCommand : MonoBehaviour
 
     #endregion
 
-    #region VillageCommand
-    public virtual bool IsInitCircleEnabled { get; set; }
+    #region 빨간색 점
+    public SpriteRenderer initCircle { get; set; }
+    public bool IsFirstShow { get; set; } = true;
+    public bool IsInitCircleEnabled
+    {
+        set
+        {
+            initCircle.enabled = value;
+            if (ParentCommand != null)
+                ParentCommand.IsInitCircleEnabled = value;
+        }
+    }
     #endregion
 }

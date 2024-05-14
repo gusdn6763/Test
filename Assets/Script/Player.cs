@@ -19,9 +19,10 @@ public class Player : MonoBehaviour
     public float Hp { get { return hp; }  set  { hp = value; } }
     public float Hungry { get { return hungry; } set { hungry = value; } }
     public float Fatigue { get { return fatigue; } set { fatigue = value; } }
-
     public int Money { get { return money; } set { money = value; } }
     public string CurrentLocation{ get { return currentLocation; } set { currentLocation = value; playerUi.MoveLocation(currentLocation); } }
+
+    public bool IsAdvanture { get; set; } = false;
 
     protected void Awake()
     {

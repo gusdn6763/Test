@@ -28,6 +28,7 @@ public class AnimationManager : MonoBehaviour
     private List<object> animationStack = new List<object>();
 
     public bool IsAnimation { get { return animationStack.Count > 0; } }
+    private List<MultiTreeCommand> disableList = new List<MultiTreeCommand>();
 
     protected void Awake()
     {
@@ -39,6 +40,9 @@ public class AnimationManager : MonoBehaviour
 
     public IEnumerator AnimationSequentialCoroutine(List<MultiTreeCommand> commandList, bool isOn)
     {
+        if (animationStack.Contains(commandList))
+            yield break;
+
         animationStack.Add(commandList);
 
         if (isOn)
@@ -65,6 +69,9 @@ public class AnimationManager : MonoBehaviour
 
     public IEnumerator AnimationCoroutine(List<MultiTreeCommand> commandList, bool isOn)
     {
+        if (animationStack.Contains(commandList))
+            yield break;
+
         animationStack.Add(commandList);
 
         if (isOn)
@@ -100,12 +107,15 @@ public class AnimationManager : MonoBehaviour
             animationStack.Remove(commandList);
 
             foreach (MultiTreeCommand command in defaultDisList)
-                command.gameObject.SetActive(false);
+                disableList.Add(command);
         }
     }
 
     public IEnumerator InitialAnimationCoroutine(List<MultiTreeCommand> commandList)
     {
+        if (animationStack.Contains(commandList))
+            yield break;
+
         animationStack.Add(commandList);
 
         List<MultiTreeCommand> firstList = new List<MultiTreeCommand>();
@@ -137,12 +147,16 @@ public class AnimationManager : MonoBehaviour
 
     public IEnumerator IsBehaviorAnimationCoroutine(MultiTreeCommand command)
     {
+        if (animationStack.Contains(command))
+            yield break;
+
         command.Behavior();
 
         if (command.IsLoop == false)
+        {
             animationStack.Add(command);
-
-        yield return new WaitUntil(() => command.IsBehaviorStart == false);
+            yield return new WaitUntil(() => command.IsBehaviorStart == false);
+        }
 
         if (command.IsLoop == false)
             animationStack.Remove(command);
@@ -150,6 +164,9 @@ public class AnimationManager : MonoBehaviour
 
     public IEnumerator SeparatorCoroutine(MultiTreeCommand command, bool isOn)
     {
+        if (animationStack.Contains(command))
+            yield break;
+
         if (isOn)
         {
             command.Show(false);
@@ -200,5 +217,27 @@ public class AnimationManager : MonoBehaviour
 
         yield return StartCoroutine(AnimationCoroutine(defaultDisList, false));
         yield return StartCoroutine(InitialAnimationCoroutine(defaultList));
+    }
+
+    public IEnumerator CommandAllDisable(MultiTreeCommand command)
+    {
+        if (command.ChildCommands.Count > 0)
+            StartCoroutine(AnimationCoroutine(command.ChildCommands, false));
+
+        if (command.ParentCommand)
+            StartCoroutine(CommandAllDisable(command.ParentCommand));
+
+        yield return new WaitUntil(() => IsAnimation == false);
+    }
+
+    /// <summary>
+    /// 코루틴 실행중인데 비활성화 하면 코루틴이 전체적으로 멈춘다.
+    /// </summary>
+    public void DisableCommand()
+    {
+        foreach (MultiTreeCommand command in disableList)
+            command.gameObject.SetActive(false);
+
+        disableList.Clear();
     }
 }

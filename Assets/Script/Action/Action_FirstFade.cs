@@ -7,16 +7,16 @@ public class Action_FirstFade : Action_Command
 {
     [SerializeField] private List<string> strings = new List<string>();
 
-    public override void MouseEvent(MouseStatus mouseStatus)
+    public override void AnimationEvent(MouseStatus mouseStatus)
     {
         switch (mouseStatus)
         {
             case MouseStatus.Excute:
-                command.onMouseEvent -= MouseEvent;
+                command.onMouseEvent -= AnimationEvent;
                 FadeManager.instance.FadeInImmediately(strings);
                 break;
         }
     }
-
+    
 
 }

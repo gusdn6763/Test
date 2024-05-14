@@ -21,5 +21,5 @@ MonoBehaviour:
   isCondition: 1
   found: 1
   childLocations: []
-  alternative: {fileID: 0}
+  saveLocation: 1
   vertex: 7

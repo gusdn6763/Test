@@ -77,11 +77,11 @@ public class VillageArea : MonoBehaviour
             Vector3 mousePosition = Input.mousePosition;
 
             //마우스를 빠르게 움직이면 드래그 중인 행동을 놓침.
-            if (clickCommand is IMoveable)
+            if (clickCommand is IRootCommand)
             {
                 if (Input.GetMouseButton(0))
                 {
-                    (currentCommand as IMoveable).SetPower(mousePosition - currentMousePosition);
+                    (currentCommand as IRootCommand).SetPower(mousePosition - currentMousePosition);
                     Interaction(currentCommand, MouseStatus.Drag);
                 }
                 else
@@ -233,10 +233,10 @@ public class VillageArea : MonoBehaviour
     #region 애니메이션
     public void VillageSetting()
     {
-        IMoveable[] commands = GetComponentsInChildren<IMoveable>(true);
+        IRootCommand[] commands = GetComponentsInChildren<IRootCommand>(true);
         List<MultiTreeCommand> commandList = new List<MultiTreeCommand>();
 
-        foreach (IMoveable moveable in commands)
+        foreach (IRootCommand moveable in commands)
             if (moveable is MultiTreeCommand command)
                 commandList.Add(command);
 

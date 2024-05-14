@@ -50,7 +50,7 @@ public abstract class MultiTreeCommand : MonoBehaviour
 
         IsFirstAppearance = true;
 
-        if (this is IMoveable)
+        if (this is IRootCommand)
             box.isTrigger = false;
         else
             box.isTrigger = true;
@@ -89,7 +89,6 @@ public abstract class MultiTreeCommand : MonoBehaviour
     {
         SetSize(GetSize());
     }
-
     public void FixedUpdate()
     {
         if (text.text.Equals(textWithoutTextAnimTags) == false)
@@ -99,7 +98,6 @@ public abstract class MultiTreeCommand : MonoBehaviour
         else
             AnimateText(Time.deltaTime);
     }
-
     protected virtual void OnDisable()
     {
         StopAllCoroutines();
@@ -286,6 +284,16 @@ public abstract class MultiTreeCommand : MonoBehaviour
     }
     #endregion
 
+    #region 상호작용
+
+    public void CommandFreeze(bool isOn)
+    {
+        if (isOn)
+            rigi.constraints = RigidbodyConstraints.FreezeAll;
+        else
+            rigi.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+    }
+
     #region 사이즈 조절
     public void TotalSizeCacluate()
     {
@@ -312,6 +320,7 @@ public abstract class MultiTreeCommand : MonoBehaviour
         box.size = new Vector3(size.x + padding.x, size.y + padding.y, 1);
     }
 
+    #endregion
     #endregion
 
     #region 마우스 상호작용
@@ -593,7 +602,7 @@ public abstract class MultiTreeCommand : MonoBehaviour
             {
                 ProcessAnimationRegions(behaviors);
 
-                if(this is IMoveable)
+                if(this is IRootCommand)
                     ChildObjectMove();
             }
 

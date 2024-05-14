@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b16df10c45f01c64bbb1f78fb5c25d88, type: 3}
   m_Name: Bag
   m_EditorClassIdentifier: 
-  commandName: "\uAC00\uBC29"
+  commandName: "\uC218\uB0A9\uD568"
   status:
     hp: 0
     fatigue: 0

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   commandName: "\uC218\uBA74"
   status:
-    hp: 0
-    fatigue: 0
-    hungry: 0
-    time: 0
-  isCondition: 1
+    hp: 5
+    fatigue: 5
+    hungry: 5
+    time: 5
+  isCondition: 0

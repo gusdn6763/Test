@@ -2,7 +2,7 @@ using Febucci.UI.Core;
 using System.Collections;
 using UnityEngine;
 
-public class VillageRootMoveCommand : VillageMoveCommand, IMoveable
+public class VillageRootMoveCommand : VillageMoveCommand, IRootCommand
 {
     #region 상호작용
     public override bool IsInitCircleEnabled { set { initCircle.enabled = value; } }

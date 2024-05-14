@@ -3,22 +3,31 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class RandomAnimation : MonoBehaviour
+public class RandomTextAnimation : MonoBehaviour
 {
-    [SerializeField] private Separator separator;
+    [SerializeField] private TextSeparator textSeparator;
 
-    private List<Separator> separators = new List<Separator>();
+    private List<TextSeparator> separators = new List<TextSeparator>();
 
     public bool IsAnimation { get; set; }
 
     private string divid;
     private float fontSize;
+    private int frequencyPerSecond;
+    private float duration;
+    private float xMax;
+    private float yMax;
 
-    public void Init(string str, float size)
+    public void Init(string str, float size, int frequency, float dur, float x, float y)
     {
         divid = Seperate(str);
         fontSize = size;
+        frequencyPerSecond = frequency;
+        duration = dur;
+        xMax = x;
+        yMax = y;
     }
+
 
     public void Active(bool isOn)
     {
@@ -27,8 +36,8 @@ public class RandomAnimation : MonoBehaviour
             IsAnimation = true;
             for (int i = 0; i < divid.Length; i++)
             {
-                Separator tmp = Instantiate(separator, transform);
-                tmp.GetInfo(divid[i].ToString(), fontSize);
+                TextSeparator tmp = Instantiate(textSeparator, transform);
+                tmp.Init(divid[i].ToString(), fontSize, frequencyPerSecond, duration, xMax, yMax);
                 tmp.IsOn = true;
 
                 separators.Add(tmp);

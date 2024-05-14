@@ -3,13 +3,13 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public interface IMoveable
+public interface IRootCommand
 {
     void SetPower(Vector3 power);
     Vector3 GetMouseWorldPosition();
 }
 
-public class VillageRootCommand : VillageCommand, IMoveable
+public class VillageRootCommand : VillageCommand, IRootCommand
 {
     public override bool IsInitCircleEnabled { set { initCircle.enabled = value; } }
     protected override void Awake()

@@ -14,15 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   commandName: "\uAD11\uC7A5"
   status:
-    hp: 0
-    fatigue: 0
-    hungry: 0
-    time: 0
-  isCondition: 0
+    hp: 5
+    fatigue: 5
+    hungry: 5
+    time: 5
+  isCondition: 1
   found: 0
   childLocations:
   - {fileID: 11400000, guid: 5dc056b515d6ad4418c56d620a91224b, type: 2}
   - {fileID: 11400000, guid: 0713c509efc300c438c9ad8f7c72eda5, type: 2}
   - {fileID: 11400000, guid: a1549f9dde257fb4ab3202e2a9ff583e, type: 2}
-  showName: 
   vertex: 0

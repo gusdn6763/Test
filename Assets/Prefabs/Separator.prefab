@@ -181,10 +181,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2549236685018874866}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f5ab56b6de64124984059e1871eae07, type: 3}
+  m_Script: {fileID: 11500000, guid: 37bf06a54a3c5224a94d4a29bdceda5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frequencyPerSecond: 30
-  duration: 0.1
-  xMax: 5
-  yMax: 5
+  frequencyPerSecond: 0
+  duration: 1
+  xMax: 0
+  yMax: 0

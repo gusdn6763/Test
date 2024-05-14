@@ -31,7 +31,6 @@ public class VillageCommand : MultiTreeCommand
     public override void Interaction(MouseStatus mouseStatus)
     {
         StartCoroutine(AnimaionCoroutine(mouseStatus));
-        onMouseEvent?.Invoke(mouseStatus);
     }
 
     IEnumerator AnimaionCoroutine(MouseStatus mouseStatus)
@@ -46,6 +45,7 @@ public class VillageCommand : MultiTreeCommand
                 yield return AnimationManager.instance.AnimationCoroutine(ChildCommands, false);
                 break;
         }
+        onMouseEvent?.Invoke(mouseStatus);
     }
 
     #endregion

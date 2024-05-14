@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,11 +9,14 @@ public class FadeManager : UIScript
 {
     public static FadeManager instance;
 
-    private Image image;
-    private TextMeshProUGUI text;
+    public bool IsFade { get; private set; }
+
     [SerializeField] private float fadeSpeed = 0.01f;
-    private Color imageColor;
-    private Color textColor;
+    [SerializeField] private Color imageColor;
+    [SerializeField] private Color textColor;
+
+    [SerializeField] private Image fadeImage;
+    [SerializeField] private TextMeshProUGUI text;
 
     private List<string> currentTexts;
     private int count = 0;
@@ -20,9 +24,6 @@ public class FadeManager : UIScript
     protected override void Awake()
     {
         base.Awake();
-
-        image = GetComponentInChildren<Image>();
-        text = GetComponentInChildren<TextMeshProUGUI>();
 
         if (instance == null)
             instance = this;
@@ -48,17 +49,21 @@ public class FadeManager : UIScript
 
     public void FadeInImmediately(string textName)
     {
+        IsFade = true;
+
         OpenClose(true);
         text.text = textName;
 
         imageColor.a = 1;
         textColor.a = 1;
-        image.color = imageColor;
+        fadeImage.color = imageColor;
         text.color = textColor;
     }
 
     public void FadeInImmediately(List<string> texts)
     {
+        IsFade = true;
+
         OpenClose(true);
 
         count = 0;
@@ -101,7 +106,7 @@ public class FadeManager : UIScript
         while (imageColor.a < 1f)
         {
             imageColor.a += 0.01f;
-            image.color = imageColor;
+            fadeImage.color = imageColor;
 
             textColor.a += 0.01f;
             text.color = textColor;
@@ -122,7 +127,7 @@ public class FadeManager : UIScript
         while (imageColor.a > 0f)
         {
             imageColor.a -= 0.01f;
-            image.color = imageColor;
+            fadeImage.color = imageColor;
 
             textColor.a -= 0.01f;
             text.color = textColor;
@@ -132,5 +137,6 @@ public class FadeManager : UIScript
         yield return new WaitUntil(() => imageColor.a <= 0f);
 
         OpenClose(false);
+        IsFade = false;
     }
 }

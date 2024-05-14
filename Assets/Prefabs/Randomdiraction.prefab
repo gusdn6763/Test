@@ -48,4 +48,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 974b8b9f98111a4499766a8edc138960, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  separator: {fileID: 52220299885264009, guid: 847f0376a68b7894fa8f90eeeb4b6601, type: 3}
+  textSeparator: {fileID: 52220299885264009, guid: 847f0376a68b7894fa8f90eeeb4b6601, type: 3}

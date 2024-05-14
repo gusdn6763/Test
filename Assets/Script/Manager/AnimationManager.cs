@@ -7,13 +7,24 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Timeline;
 
+[System.Serializable]
+public class RandomAnimation
+{
+    public RandomTextAnimation randomAnimationPrefab;
+    [Range(0, 60)] public int frequencyPerSecond;
+
+    public float duration = 1f;
+    public float xMax;
+    public float yMax;
+}
+
 public class AnimationManager : MonoBehaviour
 {
     public static AnimationManager instance;
 
-    [SerializeField] private RandomAnimation randomAnimationPrefab;
+    [SerializeField] private RandomAnimation randomAnimation;
 
-    private RandomAnimation currentAnimation;
+    private RandomTextAnimation currentAnimation;
     private List<object> animationStack = new List<object>();
 
     public bool IsAnimation { get { return animationStack.Count > 0; } }
@@ -142,8 +153,10 @@ public class AnimationManager : MonoBehaviour
         if (isOn)
         {
             command.Show(false);
-            currentAnimation = Instantiate(randomAnimationPrefab, command.transform);
-            currentAnimation.Init(command.CommandName, command.FontSize);
+            currentAnimation = Instantiate(randomAnimation.randomAnimationPrefab, command.transform);
+            currentAnimation.Init(command.CommandName, command.FontSize,
+                                  randomAnimation.frequencyPerSecond, randomAnimation.duration,
+                                  randomAnimation.xMax, randomAnimation.yMax);
             currentAnimation.Active(true);
         }
         else
@@ -164,6 +177,8 @@ public class AnimationManager : MonoBehaviour
 
     public IEnumerator VillageSettingCoroutine(List<MultiTreeCommand> commands)
     {
+        yield return new WaitUntil(() => FadeManager.instance.IsFade == false);
+
         List<MultiTreeCommand> defaultList = new List<MultiTreeCommand>();
         List<MultiTreeCommand> defaultDisList = new List<MultiTreeCommand>();
 

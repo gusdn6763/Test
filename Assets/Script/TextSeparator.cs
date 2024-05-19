@@ -12,6 +12,7 @@ public class TextSeparator : MonoBehaviour
 
     private int frequencyPerSecond;
     private float duration;
+    private float durationReduce;
     private float xMax;
     private float yMax;
 
@@ -20,11 +21,12 @@ public class TextSeparator : MonoBehaviour
         text = GetComponent<TextMeshPro>();
     }
 
-    public void Init(string dividString, float fontSize, int frequency, float dur, float x, float y)
+    public void Init(string dividString, float fontSize, int frequency, float dur, float durReduce,float x, float y)
     {
         text.text = dividString;
         text.fontSize = fontSize;
         frequencyPerSecond = frequency;
+        durationReduce = durReduce;
         duration = dur;
         xMax = x;
         yMax = y;
@@ -45,7 +47,7 @@ public class TextSeparator : MonoBehaviour
     {
         float time = 0;
         Vector3 startPosition = transform.localPosition;
-        while (time < duration)
+        while (time < duration - durationReduce)
         {
             time += Time.deltaTime;
             transform.localPosition = Vector3.Lerp(startPosition, Vector3.zero, time / duration);

@@ -12,18 +12,19 @@ public class VillageAnimationHandler : AnimationHandler
                 yield return AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands);
                 break;
             case MouseStatus.Excute:
+                //yield return AnimationManager.instance.AnimationCoroutine(command.ParentCommand.ChildCommands, false);
                 yield return AnimationManager.instance.CommandAllDisable(command);
                 break;
             case MouseStatus.Exit:
                 yield return AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false);
                 break;
         }
-        AnimationEvent(mouseStatus);
+        AnimationEvent(command, mouseStatus);
     }
 
-    public override void AnimationEvent(MouseStatus mouseStatus)
+    public override void AnimationEvent(MultiTreeCommand command,MouseStatus mouseStatus)
     {
         AnimationManager.instance.DisableCommand();
-        onAnimationEvent?.Invoke(mouseStatus);
+        command.onAnimationEndEvent?.Invoke(mouseStatus);
     }
 }

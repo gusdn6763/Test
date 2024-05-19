@@ -1,9 +1,18 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UIElements;
 
+[RequireComponent(typeof(Rigidbody))]
 public class RootVillageAnimationHandler : AnimationHandler
 {
+    private Rigidbody rigi;
+    private float defaultMass;
+
+    private void Awake()
+    {
+        rigi = GetComponent<Rigidbody>();
+        defaultMass = rigi.mass;
+    }
+
     public override IEnumerator AnimaionCoroutine(MultiTreeCommand command, MouseStatus mouseStatus)
     {
         switch (mouseStatus)
@@ -13,30 +22,35 @@ public class RootVillageAnimationHandler : AnimationHandler
                 yield return StartCoroutine(AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands));
                 break;
             case MouseStatus.Down:
+                rigi.mass = 0;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, true));
                 break;
             case MouseStatus.Up:
+                rigi.velocity = Vector3.zero;
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, false));
                 break;
             case MouseStatus.Drag:
-                transform.position = MoveCommand();
+                //transform.position = MoveCommand();
+                rigi.mass = defaultMass;
+                rigi.velocity = (MoveCommand() - transform.position).normalized * 10f;
                 break;
             case MouseStatus.Excute:
                 yield return AnimationManager.instance.CommandAllDisable(command);
                 break;
             case MouseStatus.Exit:
+                rigi.mass = defaultMass;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 yield return StartCoroutine(AnimationManager.instance.IsBehaviorAnimationCoroutine(command));
                 break;
         }
-        AnimationEvent(mouseStatus);
+        AnimationEvent(command, mouseStatus);
     }
 
-    public override void AnimationEvent(MouseStatus mouseStatus)
+    public override void AnimationEvent(MultiTreeCommand command, MouseStatus mouseStatus)
     {
         AnimationManager.instance.DisableCommand();
-        onAnimationEvent?.Invoke(mouseStatus);
+        command.onAnimationEndEvent?.Invoke(mouseStatus);
     }
 
     public Vector3 MoveCommand()
@@ -56,5 +70,11 @@ public class RootVillageAnimationHandler : AnimationHandler
         clampedWorldPosition.z = transform.position.z;
 
         return clampedWorldPosition;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Ãæµ¹");
+        rigi.AddForce((transform.position - collision.transform.position).normalized);
     }
 }

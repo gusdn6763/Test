@@ -15,15 +15,17 @@ public class RandomTextAnimation : MonoBehaviour
     private float fontSize;
     private int frequencyPerSecond;
     private float duration;
+    private float durationReduce;
     private float xMax;
     private float yMax;
 
-    public void Init(string str, float size, int frequency, float dur, float x, float y)
+    public void Init(string str, float size, int frequency, float dur, float durReduce, float x, float y)
     {
         divid = Seperate(str);
         fontSize = size;
         frequencyPerSecond = frequency;
         duration = dur;
+        durationReduce = durReduce;
         xMax = x;
         yMax = y;
     }
@@ -37,7 +39,7 @@ public class RandomTextAnimation : MonoBehaviour
             for (int i = 0; i < divid.Length; i++)
             {
                 TextSeparator tmp = Instantiate(textSeparator, transform);
-                tmp.Init(divid[i].ToString(), fontSize, frequencyPerSecond, duration, xMax, yMax);
+                tmp.Init(divid[i].ToString(), fontSize, frequencyPerSecond, duration, durationReduce, xMax, yMax);
                 tmp.IsOn = true;
 
                 separators.Add(tmp);

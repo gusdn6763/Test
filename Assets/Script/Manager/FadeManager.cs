@@ -45,6 +45,8 @@ public class FadeManager : UIScript
 
         StopAllCoroutines();
         OpenClose(false);
+
+        IsFade = false;
     }
 
     public void FadeInImmediately(string textName)

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   appearanceAnimation:
   - animationString:
-    - scale d=0.4
+    - scale d=-0.4
     waitForNormalChars: 0
     appearanceAnimationType: 0
   - animationString:

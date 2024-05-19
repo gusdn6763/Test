@@ -3,29 +3,29 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VillageMoveCommandController : MonoBehaviour
+public class MoveCommandController : MonoBehaviour
 {
-    private List<VillageMoveCommand> allChildCommands = new List<VillageMoveCommand>();
-    private VillageMoveCommand currentMoveCommand;
+    private List<MoveCommand> allChildCommands = new List<MoveCommand>();
+    private MoveCommand currentMoveCommand;
     private LocationList locationList;
 
     protected void Awake()
     {
         locationList = GetComponent<LocationList>();
-        VillageMoveCommand[] ChildCommands = GetComponentsInChildren<VillageMoveCommand>(true);
+        MoveCommand[] ChildCommands = GetComponentsInChildren<MoveCommand>(true);
 
-        foreach (VillageMoveCommand childCommand in ChildCommands)
+        foreach (MoveCommand childCommand in ChildCommands)
         {
             allChildCommands.Add(childCommand);
-            childCommand.onMouseEvent += (status) =>
+            childCommand.onAnimationEndEvent.AddListener((status) =>
             {
                 if (status == MouseStatus.Excute)
                     MoveLocation(childCommand);
-            };
+            });
         }
     }
 
-    public void MoveLocation(VillageMoveCommand command)
+    public void MoveLocation(MoveCommand command)
     {
         Player.instance.CurrentLocation = command.CommandName;
 
@@ -51,24 +51,24 @@ public class VillageMoveCommandController : MonoBehaviour
                 command.IsCondition = false;
 
             currentMoveCommand = command;
-            GameManager.instance.currentArea.Refresh();
+            GameManager.instance.currentArea.Refresh(currentMoveCommand);
         }
     }
 
-    public void CaculateAllMoveCommandStatus(VillageMoveCommand command)
+    public void CaculateAllMoveCommandStatus(MoveCommand command)
     {
-        List<Tuple<VillageMoveCommand, Status>> status = locationList.CaculateAllPathsStatusFromName(command.CommandName);
+        List<Tuple<MoveCommand, Status>> status = locationList.CaculateAllPathsStatusFromName(command.CommandName);
 
         for (int i = 0; i < allChildCommands.Count; i++)
         {
-            VillageMoveCommand childCommand = allChildCommands[i];
+            MoveCommand childCommand = allChildCommands[i];
 
             if (childCommand.Found == false)
                 continue;
 
             foreach (var tuple in status)
             {
-                VillageMoveCommand location = tuple.Item1;
+                MoveCommand location = tuple.Item1;
                 Status locationStatus = tuple.Item2;
 
                 if (childCommand.CommandName == location.CommandName)
@@ -93,7 +93,7 @@ public class VillageMoveCommandController : MonoBehaviour
 
     public bool FindLocation(string locationName)
     {
-        foreach (VillageMoveCommand childCommand in allChildCommands)
+        foreach (MoveCommand childCommand in allChildCommands)
         {
             if (childCommand.CommandName == locationName)
             {

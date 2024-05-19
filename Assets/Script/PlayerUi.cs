@@ -52,6 +52,8 @@ public class PlayerUi : UIScript
         hpStat.PreviewValue = status.hp;
         hungryStat.PreviewValue = status.hungry;
         fatigueStat.PreviewValue = status.fatigue;
+
+        Debug.Log(status.hp + "/" + status.hungry + "/" + status.fatigue);
     }
     public void ClearPreview()
     {

@@ -9,8 +9,8 @@ public abstract class Action_Command : MonoBehaviour
     protected virtual void Awake()
     {
         command = GetComponent<MultiTreeCommand>();
-        command.onMouseEvent += MouseEvent;
-        command.onAnimationEndEvent += AnimationEvent;
+        command.onMouseEvent.AddListener(MouseEvent);
+        command.onAnimationEndEvent.AddListener(AnimationEvent);
     }
 
     public virtual void MouseEvent(MouseStatus mouseStatus) { }

@@ -2,15 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public struct UiStatus
+{
+    public MouseStatus mouseStatus;
+    public UIScript uIScript;
+}
+
 public class Action_UiOpen : Action_Command
 {
-    [SerializeField] UIScript uIScript;
+    [SerializeField] UiStatus uiStatus;
 
-    public override void MouseEvent(MouseStatus mouseStatus)
+    public override void AnimationEvent(MouseStatus mouseStatus)
     {
-        if (mouseStatus == MouseStatus.Excute)
+        if (uiStatus.mouseStatus == mouseStatus)
         {
-            uIScript.OpenClose(true);
+            uiStatus.uIScript.OpenClose(true);
         }        
     }
 }

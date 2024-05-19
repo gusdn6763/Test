@@ -13,7 +13,8 @@ public class RandomAnimation
     public RandomTextAnimation randomAnimationPrefab;
     [Range(0, 60)] public int frequencyPerSecond;
 
-    public float duration = 1f;
+    public float duration;
+    public float durationReduce;
     public float xMax;
     public float yMax;
 }
@@ -41,7 +42,7 @@ public class AnimationManager : MonoBehaviour
     public IEnumerator AnimationSequentialCoroutine(List<MultiTreeCommand> commandList, bool isOn)
     {
         if (animationStack.Contains(commandList))
-            yield break;
+            yield return new WaitUntil(() => animationStack.Contains(commandList) == false);
 
         animationStack.Add(commandList);
 
@@ -70,7 +71,7 @@ public class AnimationManager : MonoBehaviour
     public IEnumerator AnimationCoroutine(List<MultiTreeCommand> commandList, bool isOn)
     {
         if (animationStack.Contains(commandList))
-            yield break;
+            yield return new WaitUntil(() => animationStack.Contains (commandList) == false);
 
         animationStack.Add(commandList);
 
@@ -114,7 +115,7 @@ public class AnimationManager : MonoBehaviour
     public IEnumerator InitialAnimationCoroutine(List<MultiTreeCommand> commandList)
     {
         if (animationStack.Contains(commandList))
-            yield break;
+            yield return new WaitUntil(() => animationStack.Contains(commandList) == false);
 
         animationStack.Add(commandList);
 
@@ -131,16 +132,17 @@ public class AnimationManager : MonoBehaviour
                     defaultList.Add(command);
             }
         }
-        foreach (MultiTreeCommand command in firstList)
-        {
-            command.Appearance();
-            yield return new WaitUntil(() => command.IsAppearanceStart == false);
-        }
 
         foreach (MultiTreeCommand command in defaultList)
             command.Appearance();
 
         yield return new WaitUntil(() => defaultList.All(cmd => cmd.IsAppearanceStart == false));
+
+        foreach (MultiTreeCommand command in firstList)
+        {
+            command.Appearance();
+            yield return new WaitUntil(() => command.IsAppearanceStart == false);
+        }
 
         animationStack.Remove(commandList);
     }
@@ -148,7 +150,7 @@ public class AnimationManager : MonoBehaviour
     public IEnumerator IsBehaviorAnimationCoroutine(MultiTreeCommand command)
     {
         if (animationStack.Contains(command))
-            yield break;
+            yield return new WaitUntil(() => animationStack.Contains(command) == false);
 
         command.Behavior();
 
@@ -165,7 +167,7 @@ public class AnimationManager : MonoBehaviour
     public IEnumerator SeparatorCoroutine(MultiTreeCommand command, bool isOn)
     {
         if (animationStack.Contains(command))
-            yield break;
+            yield return new WaitUntil(() => animationStack.Contains(command) == false);
 
         if (isOn)
         {
@@ -173,7 +175,8 @@ public class AnimationManager : MonoBehaviour
             currentAnimation = Instantiate(randomAnimation.randomAnimationPrefab, command.transform);
             currentAnimation.Init(command.CommandName, command.FontSize,
                                   randomAnimation.frequencyPerSecond, randomAnimation.duration,
-                                  randomAnimation.xMax, randomAnimation.yMax);
+                                  randomAnimation.durationReduce, randomAnimation.xMax, 
+                                  randomAnimation.yMax);
             currentAnimation.Active(true);
         }
         else
@@ -231,7 +234,7 @@ public class AnimationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 코루틴 실행중인데 비활성화 하면 코루틴이 전체적으로 멈춘다.
+    /// 코루틴 실행중인데 비활성화 하면 코루틴이 전체적으로 멈춘다. 따라서 비활성화 부분을 외부로 뺀다.
     /// </summary>
     public void DisableCommand()
     {

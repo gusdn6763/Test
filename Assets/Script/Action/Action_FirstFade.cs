@@ -12,7 +12,7 @@ public class Action_FirstFade : Action_Command
         switch (mouseStatus)
         {
             case MouseStatus.Excute:
-                command.onMouseEvent -= AnimationEvent;
+                command.onAnimationEndEvent.RemoveListener(AnimationEvent);
                 FadeManager.instance.FadeInImmediately(strings);
                 break;
         }

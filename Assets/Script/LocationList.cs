@@ -98,9 +98,10 @@ public class PriorityQueue<T>
     }
 }
 
+
 public class LocationList : MonoBehaviour
 {
-    [SerializeField] private VillageMoveCommand parentLocation;
+    [SerializeField] private MoveCommand parentLocation;
 
     private Graph graph;
     private int locationCount;
@@ -112,38 +113,38 @@ public class LocationList : MonoBehaviour
         PopulateGraph(parentLocation);
     }
 
-    private int CountLocations(VillageMoveCommand parent)
+    private int CountLocations(MoveCommand parent)
     {
         int count = 1;
 
-        foreach (VillageMoveCommand child in parent.ChildLocations)
+        foreach (MoveCommand child in parent.ChildLocations)
             count += CountLocations(child); 
 
         return count;
     }
 
-    private void PopulateGraph(VillageMoveCommand parent)
+    private void PopulateGraph(MoveCommand parent)
     {
-        foreach (VillageMoveCommand child in parent.ChildLocations)
+        foreach (MoveCommand child in parent.ChildLocations)
         {
             graph.AddEdge(parent, child);
             PopulateGraph(child);
         }
     }
 
-    public List<Tuple<VillageMoveCommand, Status>> CaculateAllPathsStatusFromName(string fromLocation)
+    public List<Tuple<MoveCommand, Status>> CaculateAllPathsStatusFromName(string fromLocation)
     {
         int currentVertex = graph.GetVertexFromName(fromLocation);
         List<Tuple<int, Status>> shortestPaths = Dijkstra.DijkstraAlgorithm(currentVertex, locationCount, graph);
 
-        List<Tuple<VillageMoveCommand, Status>> result = new List<Tuple<VillageMoveCommand, Status>>();
+        List<Tuple<MoveCommand, Status>> result = new List<Tuple<MoveCommand, Status>>();
         for (int i = 0; i < shortestPaths.Count; i++)
         {
             if (shortestPaths[i].Item1 != int.MaxValue)
             {
-                VillageMoveCommand location = graph.locations[i];
+                MoveCommand location = graph.locations[i];
                 Status status = shortestPaths[i].Item2;
-                result.Add(new Tuple<VillageMoveCommand, Status>(location, status));
+                result.Add(new Tuple<MoveCommand, Status>(location, status));
             }
             else
                 Debug.LogError("찾지 못하는 경로가 존재하는데?");

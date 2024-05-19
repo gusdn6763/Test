@@ -9,6 +9,7 @@ using TMPro;
 using UnityEngine;
 using Febucci.UI.Actions;
 using System.Linq;
+using UnityEngine.Events;
 
 public enum MouseStatus
 {
@@ -22,9 +23,12 @@ public enum MouseStatus
 }
 
 [RequireComponent(typeof(AnimationHandler))]
-public abstract class MultiTreeCommand : MonoBehaviour
+public class MultiTreeCommand : MonoBehaviour
 {
     [SerializeField] protected AnimationData animationData;
+
+    public UnityEvent<MouseStatus> onMouseEvent = new UnityEvent<MouseStatus>();        //마우스 상호작용시
+    public UnityEvent<MouseStatus> onAnimationEndEvent = new UnityEvent<MouseStatus>(); //애니메이션 종료시
 
     protected AnimationHandler animationHandler;
     protected ListMenu listMenu;
@@ -34,11 +38,7 @@ public abstract class MultiTreeCommand : MonoBehaviour
     protected RectTransform rect; 
     protected Rigidbody rigi;
 
-    protected Vector2 padding = new Vector2(2f, 0f);
-
-    [Header("소모값")]
-    [SerializeField] private Status status;
-    public Status MyStatus { get => status; set => status = value; }
+    protected Vector2 padding = new Vector2(0.2f, 0f);
 
     [Header("명칭")]
 
@@ -48,7 +48,28 @@ public abstract class MultiTreeCommand : MonoBehaviour
     [Header("보이기 여부")]
 
     [SerializeField] private bool isCondition = false;
-    public virtual bool IsCondition { get { return isCondition; } set { isCondition = value; } }
+    public virtual bool IsCondition { get { return isCondition; }
+        set
+        {
+            isCondition = value;
+            if (IsFirstShow && IsCondition)
+            {
+                IsFirstShow = false;
+                IsInitCircleEnabled = true;
+            }
+        } 
+    }
+    public SpriteRenderer initCircle { get; set; }
+    public bool IsFirstShow { get; set; } = true;
+    public bool IsInitCircleEnabled
+    {
+        set
+        {
+            initCircle.enabled = value;
+            if (ParentCommand != null)
+                ParentCommand.IsInitCircleEnabled = value;
+        }
+    }
 
     protected virtual void Awake()
     {
@@ -63,7 +84,7 @@ public abstract class MultiTreeCommand : MonoBehaviour
 
         IsFirstAppearance = true;
 
-        if (this is IRootCommand)
+        if (IsRootCommand)
             box.isTrigger = false;
         else
             box.isTrigger = true;
@@ -105,7 +126,6 @@ public abstract class MultiTreeCommand : MonoBehaviour
         else
             AnimateText(Time.deltaTime);
     }
-
     protected virtual void OnDisable()
     {
         StopAllCoroutines();
@@ -113,7 +133,6 @@ public abstract class MultiTreeCommand : MonoBehaviour
         IsDisAppearanceStart = false;
         IsBehaviorStart = false;
     }
-
     protected void OnMouseEnter()
     {
         initCircle.enabled = false;
@@ -134,6 +153,31 @@ public abstract class MultiTreeCommand : MonoBehaviour
             }
 
             return listmenu;
+        }
+    }
+
+    public bool IsRootCommand
+    {
+        get
+        {
+            if (ParentCommand == null)
+                return true;
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 최상위 행동 찾기
+    /// </summary>
+    public MultiTreeCommand RootCommand
+    {
+        get
+        {
+            if (ParentCommand == null)
+                return this;
+            else
+                return ParentCommand.RootCommand;
         }
     }
 
@@ -175,20 +219,6 @@ public abstract class MultiTreeCommand : MonoBehaviour
                 if (childCommand)
                     childCommands.Add(childCommand);
             }
-        }
-    }
-
-    /// <summary>
-    /// 최상위 행동 찾기
-    /// </summary>
-    public MultiTreeCommand RootCommand
-    {
-        get
-        {
-            if (ParentCommand == null)
-                return this;
-            else
-                return ParentCommand.RootCommand;
         }
     }
 
@@ -299,6 +329,24 @@ public abstract class MultiTreeCommand : MonoBehaviour
 
     #region 상호작용
 
+    //레이어 변경
+    public void ChangeLayer(LayerMask layerMask)
+    {
+        ChangeLayerRecursively(RootCommand, layerMask);
+    }
+    private void ChangeLayerRecursively(MultiTreeCommand command, LayerMask layerMask)
+    {
+        int layer = LayerMaskExtensions.ToSingleLayer(layerMask);
+        command.gameObject.layer = layer;
+
+        for (int i = 0; i < command.transform.childCount; i++)
+            command.transform.GetChild(i).gameObject.layer = layer;
+
+        foreach (MultiTreeCommand child in command.ChildCommands)
+            ChangeLayerRecursively(child, layerMask);
+    }
+
+    
     public void CommandFreeze(bool isOn)
     {
         if (isOn)
@@ -337,18 +385,18 @@ public abstract class MultiTreeCommand : MonoBehaviour
     #endregion
 
     #region 마우스 상호작용
-    public Action<MouseStatus> onMouseEvent;
+    protected MouseStatus currentMouseStatus;
     public virtual void Interaction(MouseStatus mouseStatus)
     {
-        onMouseEvent?.Invoke(mouseStatus);
-        Player.instance.ShowPreviewStatus(status);
-        StartCoroutine(animationHandler.AnimaionCoroutine(this, mouseStatus));
+        currentMouseStatus = mouseStatus;
+        onMouseEvent?.Invoke(currentMouseStatus);
+        StartCoroutine(animationHandler.AnimaionCoroutine(this, currentMouseStatus));
     }
 
     #endregion
 
     #region 애니메이션
-    public Action<MouseStatus> onAnimationEndEvent;
+
     public bool IsAppearanceStart { get; set; }           //생성시작
     public bool IsDisAppearanceStart { get; set; }        //사라짐시작
     public bool IsBehaviorStart { get; set; }             //행동애니메이션 시작
@@ -505,7 +553,20 @@ public abstract class MultiTreeCommand : MonoBehaviour
     }
     public virtual BehaviorAnimationScriptible GetBehaviorTags()
     {
-        return GetAnimationTags(animationData.behaviorAnimation, animation => true);
+        return GetAnimationTags(animationData.behaviorAnimation, animation =>
+        {
+            switch (currentMouseStatus)
+            {
+                case MouseStatus.Enter:
+                    return animation.behaviorAnimationType == BehaviorAnimationType.Enter;
+                case MouseStatus.Down:
+                    return animation.behaviorAnimationType == BehaviorAnimationType.Clicking;
+                case MouseStatus.Up:
+                    return animation.behaviorAnimationType == BehaviorAnimationType.Up;
+                default:
+                    return animation.behaviorAnimationType == BehaviorAnimationType.Default;
+            }
+        });
     }
     public virtual DisAppearanceAnimationScriptible GetDisAppearanceTags()
     {
@@ -619,7 +680,7 @@ public abstract class MultiTreeCommand : MonoBehaviour
             {
                 ProcessAnimationRegions(behaviors);
 
-                if(this is IRootCommand)
+                if(IsRootCommand)
                     ChildObjectMove();
             }
 
@@ -945,19 +1006,5 @@ public abstract class MultiTreeCommand : MonoBehaviour
     }
     #endregion
 
-    #endregion
-
-    #region 빨간색 점
-    public SpriteRenderer initCircle { get; set; }
-    public bool IsFirstShow { get; set; } = true;
-    public bool IsInitCircleEnabled
-    {
-        set
-        {
-            initCircle.enabled = value;
-            if (ParentCommand != null)
-                ParentCommand.IsInitCircleEnabled = value;
-        }
-    }
     #endregion
 }

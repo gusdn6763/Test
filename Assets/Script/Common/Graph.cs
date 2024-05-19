@@ -4,18 +4,18 @@ using System;
 public class Graph
 {
     public List<Tuple<int, Status>>[] list;
-    public List<VillageMoveCommand> locations;
+    public List<MoveCommand> locations;
 
     public Graph(int vertexCount)
     {
         list = new List<Tuple<int, Status>>[vertexCount];
-        locations = new List<VillageMoveCommand>(vertexCount);
+        locations = new List<MoveCommand>(vertexCount);
 
         for (int i = 0; i < vertexCount; i++)
             list[i] = new List<Tuple<int, Status>>();
     }
 
-    public void AddEdge(VillageMoveCommand from, VillageMoveCommand to)
+    public void AddEdge(MoveCommand from, MoveCommand to)
     {
         if (locations.Contains(from) == false)
             locations.Add(from);

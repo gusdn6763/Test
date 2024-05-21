@@ -9,7 +9,6 @@ using TMPro;
 using UnityEngine;
 using Febucci.UI.Actions;
 using System.Linq;
-using UnityEngine.Events;
 
 public enum MouseStatus
 {
@@ -27,60 +26,45 @@ public class MultiTreeCommand : MonoBehaviour
 {
     [SerializeField] protected AnimationData animationData;
 
-    public UnityEvent<MouseStatus> onMouseEvent = new UnityEvent<MouseStatus>();        //마우스 상호작용시
-    public UnityEvent<MouseStatus> onAnimationEndEvent = new UnityEvent<MouseStatus>(); //애니메이션 종료시
+    public Action<bool> isConditionEvent;           //활성화 여부 상호작용시
+    public Action<MouseStatus> onMouseEvent;        //마우스 상호작용시
+    public Action<MouseStatus> onAnimationEndEvent; //애니메이션 종료시
 
     protected AnimationHandler animationHandler;
-    protected ListMenu listMenu;
+    protected SpriteList spriteList;
+    protected MenuList menuList;
 
     protected BoxCollider box;
     protected TextMeshPro text;
     protected RectTransform rect; 
-    protected Rigidbody rigi;
 
-    protected Vector2 padding = new Vector2(0.2f, 0f);
+    protected Vector2 padding = new Vector2(0.1f, 0f);
 
     [Header("명칭")]
-
     [SerializeField] private string commandName;
     public string CommandName { get => commandName; private set => commandName = value; }
 
     [Header("보이기 여부")]
-
     [SerializeField] private bool isCondition = false;
-    public virtual bool IsCondition { get { return isCondition; }
+    public virtual bool IsCondition
+    {
+        get => isCondition;
         set
         {
             isCondition = value;
-            if (IsFirstShow && IsCondition)
-            {
-                IsFirstShow = false;
-                IsInitCircleEnabled = true;
-            }
-        } 
-    }
-    public SpriteRenderer initCircle { get; set; }
-    public bool IsFirstShow { get; set; } = true;
-    public bool IsInitCircleEnabled
-    {
-        set
-        {
-            initCircle.enabled = value;
-            if (ParentCommand != null)
-                ParentCommand.IsInitCircleEnabled = value;
+            isConditionEvent?.Invoke(IsCondition);
         }
     }
 
     protected virtual void Awake()
     {
-        listMenu = GetComponentInChildren<ListMenu>(true);
-        initCircle = GetComponentInChildren<SpriteRenderer>(true);
-
         animationHandler = GetComponent<AnimationHandler>();
+        spriteList = GetComponentInChildren<SpriteList>(true);
+        menuList = GetComponentInChildren<MenuList>(true);
+
         text = GetComponent<TextMeshPro>();
         rect = GetComponent<RectTransform>();
         box = GetComponent<BoxCollider>();
-        rigi = GetComponent<Rigidbody>();
 
         IsFirstAppearance = true;
 
@@ -96,6 +80,8 @@ public class MultiTreeCommand : MonoBehaviour
     {
         if (initialized) 
             return;
+
+        spriteList.TryInitializing();
 
         text.text = CommandName;
         initialized = true;
@@ -113,10 +99,7 @@ public class MultiTreeCommand : MonoBehaviour
         PositionInitialize();
         HideAllCharactersTime();
     }
-    protected virtual void OnEnable()
-    {
-        SetSize(GetSize());
-    }
+
     public void FixedUpdate()
     {
         if (text.text.Equals(textWithoutTextAnimTags) == false)
@@ -126,6 +109,12 @@ public class MultiTreeCommand : MonoBehaviour
         else
             AnimateText(Time.deltaTime);
     }
+
+    private void OnEnable()
+    {
+        SetSize(GetSize());
+    }
+
     protected virtual void OnDisable()
     {
         StopAllCoroutines();
@@ -133,20 +122,16 @@ public class MultiTreeCommand : MonoBehaviour
         IsDisAppearanceStart = false;
         IsBehaviorStart = false;
     }
-    protected void OnMouseEnter()
-    {
-        initCircle.enabled = false;
-    }
 
     #region 트리 관련
-    private ListMenu listmenu;
-    public ListMenu MyListMenu
+    private MenuList listmenu;
+    public MenuList MyMenuList
     {
         get
         {
             if (listmenu == null)
             {
-                listmenu = GetComponentInChildren<ListMenu>(true);
+                listmenu = GetComponentInChildren<MenuList>(true);
 
                 if (listmenu == null)
                     Debug.LogError(name + "잘못된 트리구조");
@@ -210,11 +195,11 @@ public class MultiTreeCommand : MonoBehaviour
     public void RefreshChildCommands()
     {
         childCommands = new List<MultiTreeCommand>();
-        if (MyListMenu != null)
+        if (MyMenuList != null)
         {
-            for (int i = 0; i < MyListMenu.transform.childCount; i++)
+            for (int i = 0; i < MyMenuList.transform.childCount; i++)
             {
-                Transform childTransform = MyListMenu.transform.GetChild(i);
+                Transform childTransform = MyMenuList.transform.GetChild(i);
                 MultiTreeCommand childCommand = childTransform.GetComponent<MultiTreeCommand>();
                 if (childCommand)
                     childCommands.Add(childCommand);
@@ -332,53 +317,28 @@ public class MultiTreeCommand : MonoBehaviour
     //레이어 변경
     public void ChangeLayer(LayerMask layerMask)
     {
-        ChangeLayerRecursively(RootCommand, layerMask);
+        ChangeLayerRecursively(RootCommand.rect, layerMask);
     }
-    private void ChangeLayerRecursively(MultiTreeCommand command, LayerMask layerMask)
+    private void ChangeLayerRecursively(RectTransform obj, LayerMask layerMask)
     {
         int layer = LayerMaskExtensions.ToSingleLayer(layerMask);
-        command.gameObject.layer = layer;
+        obj.gameObject.layer = layer;
 
-        for (int i = 0; i < command.transform.childCount; i++)
-            command.transform.GetChild(i).gameObject.layer = layer;
-
-        foreach (MultiTreeCommand child in command.ChildCommands)
+        foreach (RectTransform child in obj)
             ChangeLayerRecursively(child, layerMask);
     }
-
-    
-    public void CommandFreeze(bool isOn)
-    {
-        if (isOn)
-            rigi.constraints = RigidbodyConstraints.FreezeAll;
-        else
-            rigi.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
-    }
-
     #region 사이즈 조절
-    public void TotalSizeCacluate()
-    {
-        float maxX = 0;
-        float maxY = 0;
-        Vector2 size;
-        foreach (MultiTreeCommand childCommand in ChildCommands)
-        {
-            size = childCommand.GetSize();
-            maxX = Mathf.Max(size.x, maxX);
-            maxY = Mathf.Max(size.y, maxY);
-        }
-        size = new Vector2(maxX, maxY);
-        foreach (MultiTreeCommand childCommand in ChildCommands)
-            SetSize(size);
-    }
     public Vector2 GetSize()
     {
         return new Vector2(text.preferredWidth, text.preferredHeight);
     }
     public void SetSize(Vector2 size)
     {
-        rect.sizeDelta = new Vector2(size.x + padding.x, size.y + padding.y);
-        box.size = new Vector3(size.x + padding.x, size.y + padding.y, 1);
+        Vector2 offsetSize = new Vector2(size.x + padding.x, size.y + padding.y);
+        rect.sizeDelta = offsetSize;
+        box.size = new Vector3(offsetSize.x, offsetSize.y, 1);
+
+        spriteList.SetSize(offsetSize);
     }
 
     #endregion

@@ -39,35 +39,6 @@ public class AnimationManager : MonoBehaviour
             Destroy(gameObject);
     }
 
-    public IEnumerator AnimationSequentialCoroutine(List<MultiTreeCommand> commandList, bool isOn)
-    {
-        if (animationStack.Contains(commandList))
-            yield return new WaitUntil(() => animationStack.Contains(commandList) == false);
-
-        animationStack.Add(commandList);
-
-        if (isOn)
-        {
-            foreach (MultiTreeCommand command in commandList)
-            {
-                command.Appearance();
-                yield return new WaitUntil(() => command.IsAppearanceStart == false);
-            }
-            animationStack.Remove(commandList);
-        }
-        else
-        {
-            foreach (MultiTreeCommand command in commandList)
-            {
-                command.DisAppearance();
-                yield return new WaitUntil(() => command.IsDisAppearanceStart == false);
-            }
-            animationStack.Remove(commandList);
-            foreach (MultiTreeCommand command in commandList)
-                command.gameObject.SetActive(false);
-        }
-    }
-
     public IEnumerator AnimationCoroutine(List<MultiTreeCommand> commandList, bool isOn)
     {
         if (animationStack.Contains(commandList))

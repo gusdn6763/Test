@@ -6,11 +6,13 @@ public class RootVillageAnimationHandler : AnimationHandler
 {
     private Rigidbody rigi;
     private float defaultMass;
+    private float drfaultDrag;
 
     private void Awake()
     {
         rigi = GetComponent<Rigidbody>();
         defaultMass = rigi.mass;
+        drfaultDrag = rigi.drag;
     }
 
     public override IEnumerator AnimaionCoroutine(MultiTreeCommand command, MouseStatus mouseStatus)
@@ -23,6 +25,7 @@ public class RootVillageAnimationHandler : AnimationHandler
                 break;
             case MouseStatus.Down:
                 rigi.mass = 0;
+                rigi.drag = 0;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, true));
                 break;
@@ -31,7 +34,6 @@ public class RootVillageAnimationHandler : AnimationHandler
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, false));
                 break;
             case MouseStatus.Drag:
-                //transform.position = MoveCommand();
                 rigi.mass = defaultMass;
                 rigi.velocity = (MoveCommand() - transform.position).normalized * 10f;
                 break;

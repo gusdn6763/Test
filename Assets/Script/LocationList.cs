@@ -1,107 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-
-public class Dijkstra
-{
-    public static List<Tuple<int, Status>> DijkstraAlgorithm(int start, int V, Graph graph)
-    {
-        List<Tuple<int, Status>> distWithStatus = new List<Tuple<int, Status>>();
-        for (int i = 0; i < V; i++)
-            distWithStatus.Add(new Tuple<int, Status>(int.MaxValue, new Status()));
-
-        distWithStatus[start] = new Tuple<int, Status>(0, new Status());
-
-        PriorityQueue<Tuple<int, int>> q = new PriorityQueue<Tuple<int, int>>((x, y) => x.Item1.CompareTo(y.Item1));
-        q.Enqueue(new Tuple<int, int>(0, start));
-
-        while (q.Count != 0)
-        {
-            int cost = -q.Peek().Item1;
-            int from = q.Peek().Item2;
-            q.Dequeue();
-
-            if (distWithStatus[from].Item1 < cost)
-                continue;
-
-            foreach (var tuple in graph.list[from])
-            {
-                int to = tuple.Item1;
-                int distFromTo = cost + 1;
-                if (distFromTo < distWithStatus[to].Item1)
-                {
-                    distWithStatus[to] = new Tuple<int, Status>(distFromTo, distWithStatus[from].Item2 + tuple.Item2);
-                    q.Enqueue(new Tuple<int, int>(-distFromTo, to));
-                }
-            }
-        }
-        return distWithStatus;
-    }
-}
-
-public class PriorityQueue<T>
-{
-    private List<T> data;
-    private Comparison<T> comparison;
-
-    public PriorityQueue(Comparison<T> comparison)
-    {
-        this.data = new List<T>();
-        this.comparison = comparison;
-    }
-
-    public void Enqueue(T item)
-    {
-        data.Add(item);
-        int ci = data.Count - 1;
-        while (ci > 0)
-        {
-            int pi = (ci - 1) / 2;
-            if (comparison(data[ci], data[pi]) >= 0) break;
-            T tmp = data[ci]; data[ci] = data[pi]; data[pi] = tmp;
-            ci = pi;
-        }
-    }
-
-    public T Dequeue()
-    {
-        if (data.Count == 0) 
-            throw new InvalidOperationException("Queue is empty.");
-
-        T frontItem = data[0];
-        data[0] = data[data.Count - 1];
-        data.RemoveAt(data.Count - 1);
-
-        int ci = 0;
-        while (ci < data.Count)
-        {
-            int li = 2 * ci + 1, ri = 2 * ci + 2;
-            if (li >= data.Count) break;
-            int mi = ri >= data.Count || comparison(data[li], data[ri]) < 0 ? li : ri;
-            if (comparison(data[ci], data[mi]) <= 0) break;
-            T tmp = data[ci]; data[ci] = data[mi]; data[mi] = tmp;
-            ci = mi;
-        }
-        return frontItem;
-    }
-
-    public T Peek()
-    {
-        if (data.Count == 0) throw new InvalidOperationException("Queue is empty.");
-        return data[0];
-    }
-
-    public int Count
-    {
-        get { return data.Count; }
-    }
-}
-
 
 public class LocationList : MonoBehaviour
 {
     [SerializeField] private MoveCommand parentLocation;
+
+    private List<MoveCommand> allMoveCommands = new List<MoveCommand>();
 
     private Graph graph;
     private int locationCount;
@@ -132,6 +37,42 @@ public class LocationList : MonoBehaviour
         }
     }
 
+    public void CaculateAllMoveCommandStatus(MoveCommand command)
+    {
+        List<Tuple<MoveCommand, Status>> status = CaculateAllPathsStatusFromName(command.CommandName);
+
+        for (int i = 0; i < allMoveCommands.Count; i++)
+        {
+            MoveCommand childCommand = allMoveCommands[i];
+
+            if (childCommand.Found == false)
+                continue;
+
+            foreach (var tuple in status)
+            {
+                MoveCommand location = tuple.Item1;
+                Status locationStatus = tuple.Item2;
+
+                if (childCommand.CommandName == location.CommandName)
+                {
+                    childCommand.MyStatus = locationStatus;
+                    break;
+                }
+            }
+        }
+
+        List<string> listTmp = new List<string>();
+        List<string> list = SearchNearLocationFromName(Player.instance.CurrentLocation);
+        for (int j = 0; j < list.Count; j++)
+        {
+            if (FindLocation(list[j]))
+                listTmp.Add("경로 발견 : " + list[j]);
+        }
+
+        if (listTmp.Count > 0)
+            Player.instance.ShowIntroduce(listTmp);
+    }
+
     public List<Tuple<MoveCommand, Status>> CaculateAllPathsStatusFromName(string fromLocation)
     {
         int currentVertex = graph.GetVertexFromName(fromLocation);
@@ -153,7 +94,6 @@ public class LocationList : MonoBehaviour
         return result;
     }
 
-
     public List<string> SearchNearLocationFromName(string fromLocation)
     {
         int currentVertex = graph.GetVertexFromName(fromLocation);
@@ -165,5 +105,21 @@ public class LocationList : MonoBehaviour
         }
 
         return nearLocations;
+    }
+
+    public bool FindLocation(string locationName)
+    {
+        foreach (MoveCommand childCommand in allMoveCommands)
+        {
+            if (childCommand.CommandName == locationName)
+            {
+                if (childCommand.Found)
+                    return false;
+
+                childCommand.Found = true;
+                return true;
+            }
+        }
+        return false;
     }
 }

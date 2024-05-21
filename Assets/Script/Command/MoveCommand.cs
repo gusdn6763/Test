@@ -5,9 +5,9 @@ public class MoveCommand : MultiTreeCommand
 {
     [Header("소모값")]
     [SerializeField] private Status defaultStatus;
-
-    private Status totalStatus;
-    public Status MyStatus { get => defaultStatus; set => totalStatus = value; }
+    private Status currentStatus = new Status();
+    public Status DefaultStatus { get => defaultStatus; set => defaultStatus = value; }
+    public Status MyStatus { get => DefaultStatus; set => currentStatus = value; }
 
     [Header("찾음 여부")]
     [SerializeField] private bool found;
@@ -60,15 +60,14 @@ public class MoveCommand : MultiTreeCommand
         }
         base.Interaction(mouseStatus);
     }
-
     public virtual void ShowPlayerStatus(bool isOn)
     {
         if (isOn)
         {
             if(alternativeLocation)
-                Player.instance.ShowPreviewStatus(MyStatus, alternativeLocation.CommandName);
+                Player.instance.ShowPreviewStatus(currentStatus, alternativeLocation.CommandName);
             else
-                Player.instance.ShowPreviewStatus(MyStatus, CommandName);
+                Player.instance.ShowPreviewStatus(currentStatus, CommandName);
         }
         else
             Player.instance.StopPreviewStatus();

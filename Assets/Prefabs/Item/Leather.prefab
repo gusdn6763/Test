@@ -246,15 +246,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1351099080219135502}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3d7c5b0866a91b4a8744b91c2a3c3d5, type: 3}
+  m_Script: {fileID: 11500000, guid: cfde0d67e35040443b53e6ff4af99422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animationData: {fileID: 11400000, guid: 86cac7bec2fea58469f9c5c3b3c11579, type: 2}
-  status:
-    hp: 0
-    fatigue: 0
-    hungry: 0
-    time: 0
   commandName: "\uAC00\uC8FD"
   isCondition: 1
 --- !u!1 &3898406617919653425

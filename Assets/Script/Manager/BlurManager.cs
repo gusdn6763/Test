@@ -12,7 +12,6 @@ public class BlurManager : MonoBehaviour
 {
     public static BlurManager instance;
 
-    public UnityEvent onBlurEndEvent;
     public bool BlurStart { get; private set; }
 
     [SerializeField] private float waitTime;
@@ -62,6 +61,5 @@ public class BlurManager : MonoBehaviour
             volume.weight = 0f;
         }
         BlurStart = false;
-        onBlurEndEvent?.Invoke();
     }
 }

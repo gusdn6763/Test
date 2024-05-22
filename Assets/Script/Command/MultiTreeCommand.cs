@@ -25,6 +25,7 @@ public enum MouseStatus
 public class MultiTreeCommand : MonoBehaviour
 {
     [SerializeField] protected AnimationData animationData;
+    public Area CurrentArea { get; set; }
 
     public Action<bool> isConditionEvent;           //활성화 여부 상호작용시
     public Action<MouseStatus> onMouseEvent;        //마우스 상호작용시

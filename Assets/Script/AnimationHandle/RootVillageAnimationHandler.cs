@@ -8,6 +8,8 @@ public class RootVillageAnimationHandler : AnimationHandler
     private float defaultMass;
     private float drfaultDrag;
 
+    public bool IsFirstAppearance { get; set; } = true;
+
     private void Awake()
     {
         rigi = GetComponent<Rigidbody>();

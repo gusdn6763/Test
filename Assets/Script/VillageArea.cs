@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class VillageArea : MonoBehaviour
+public class VillageArea : Area
 {
+    [SerializeField] private List<MultiTreeCommand> defaultCommands = new List<MultiTreeCommand>();
+    [SerializeField] private BackgroundSpeechArea backgroundSpeechArea;
+
     //생성된 아이템들
     private Dictionary<MoveCommand, MultiTreeCommand> createList = new Dictionary<MoveCommand, MultiTreeCommand>();
+    private List<MoveCommand> moveCommands = new List<MoveCommand>();
     private MoveCommand currentMoveCommand;
 
     private Stack<MultiTreeCommand> selectCommandStack = new Stack<MultiTreeCommand>();
@@ -29,22 +33,21 @@ public class VillageArea : MonoBehaviour
 
     private void Start()
     {
-        DisAbleAllVillageCommand();
+        DisAbleAllCommand();
 
         startPosition.onMouseEvent.Invoke(MouseStatus.Excute);
         startPosition.onAnimationEndEvent.Invoke(MouseStatus.Excute);
-        MoveLocation(startPosition);
     }
 
     private void Update()
     {
-        if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart)
+        if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || isInteraction)
             return;
 
         CommandActiving();
     }
 
-    public void DisAbleAllVillageCommand()
+    public void DisAbleAllCommand()
     {
         MultiTreeCommand[] commands = GetComponentsInChildren<MultiTreeCommand>(true);
 
@@ -52,8 +55,20 @@ public class VillageArea : MonoBehaviour
         {
             if (command.IsRootCommand)
                 command.DisableAllCommandFromBottom();
-        }
 
+            if (command is MoveCommand)
+            {
+                MoveCommand moveCommand = command as MoveCommand;
+
+                moveCommands.Add(moveCommand);
+
+                moveCommand.onAnimationEndEvent += (status) =>
+                {
+                    if (status == MouseStatus.Excute)
+                        StartCoroutine(MoveLocationCoroutine(moveCommand));
+                };
+            }
+        }
     }
     public void CommandActiving()
     {
@@ -195,60 +210,33 @@ public class VillageArea : MonoBehaviour
             }
             if (selectCommandStack.Count == 0)
             {
-                StartCoroutine(VillageSetting(multiTreeCommand));
+                StartCoroutine(BlurChangeCoroutine(multiTreeCommand));
             }
         }
     }
 
-
-    #region 애니메이션
-    public void Refresh(MoveCommand villageMoveCommand)
-    {
-        currentMoveCommand = villageMoveCommand;
-
-        MultiTreeCommand[] commands = GetComponentsInChildren<MultiTreeCommand>(true);
-        List<MultiTreeCommand> commandList = new List<MultiTreeCommand>();
-
-        foreach (MultiTreeCommand command in commands)
-            if (command.IsRootCommand)
-                commandList.Add(command);
-
-        StartCoroutine(RefreshCoroutine(commandList));
-    }
-
-    private IEnumerator RefreshCoroutine(List<MultiTreeCommand> commandList)
-    {
-        List<MultiTreeCommand> destroyableCommands = new List<MultiTreeCommand>();
-
-        foreach (var entry in createList.ToList())
-        {
-            if (entry.Key != currentMoveCommand && !entry.Key.SaveLocation)
-            {
-                entry.Value.IsCondition = false;
-                destroyableCommands.Add(entry.Value);
-                createList.Remove(entry.Key);
-            }
-        }
-
-        yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(commandList));
-
-        foreach (var command in destroyableCommands)
-            Destroy(command.gameObject);
-    }
-
-    #endregion
-    IEnumerator VillageSetting(MultiTreeCommand multiTreeCommand)
+    IEnumerator BlurChangeCoroutine(MultiTreeCommand multiTreeCommand)
     {
         yield return StartCoroutine(BlurManager.instance.BlurCoroutine(false));
         multiTreeCommand.ChangeLayer(defaultLayerMask);
-
-        if (multiTreeCommand is MoveCommand)
-            MoveLocation(multiTreeCommand as MoveCommand);
     }
 
-    public void MoveLocation(MoveCommand command)
+    public IEnumerator MoveLocationCoroutine(MoveCommand command)
     {
-        Player.instance.CurrentLocation = command.CommandName;
+        if (currentMoveCommand == command)
+            yield break;
+
+        if (command.alternativeLocation)
+        {
+            yield return MoveLocationCoroutine(command.alternativeLocation);
+        }
+        else
+        {
+            if (command.IsDisable)
+                command.IsCondition = false;
+        }
+
+        locationList.CaculateAllMoveCommandStatus(moveCommands, command);
 
         //이전 지역 정보 비활성화
         if (currentMoveCommand)
@@ -260,27 +248,65 @@ public class VillageArea : MonoBehaviour
                 tmp.CommandListOnOff(false);
         }
 
-        locationList.CaculateAllMoveCommandStatus(command);
+        //기본 최상위 행동 먼저 실행
+        yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(defaultCommands));
 
-        if (command.alternativeLocation)
+        if (currentMoveCommand)
         {
-            MoveLocation(command.alternativeLocation);
-        }
-        else
-        {
-            if (command.IsDisable)
-                command.IsCondition = false;
+            //이전 장소 고유 오브젝트 비활성화
+            yield return StartCoroutine(DestoryCommandCoroutine(currentMoveCommand));
 
-            currentMoveCommand = command;
-            Refresh(currentMoveCommand);
+            //이전 장소 백그라운드 대사효과 비활성화
+            yield return(StartCoroutine(backgroundSpeechArea.DisableSpeech()));
         }
+
+        //장소 이동
+        Player.instance.CurrentLocation = command.CommandName;
+
+        //장소 이동한 오브젝트 활성화
+        List<MultiTreeCommand> commands = new List<MultiTreeCommand>();
+
+        foreach (var entry in createList.ToList())
+        {
+            if (entry.Key == command && entry.Key.SaveLocation)
+            {
+                commands.Add(entry.Value);
+                createList.Remove(entry.Key);
+            }
+        }
+        yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(commands));
+
+        //장소 백그라운드 대사효과 활성화
+         backgroundSpeechArea.SpeechStart(command);
+
+        currentMoveCommand = command;
     }
 
-    public void CreateItem(MoveCommand villageMoveCommand, ItemCommand itemRootCommand)
+    private IEnumerator DestoryCommandCoroutine(MoveCommand moveCommand)
     {
-        MultiTreeCommand command = Instantiate(itemRootCommand, transform);
-        command.transform.localPosition = Vector3.zero;
+        List<MultiTreeCommand> destroyableCommands = new List<MultiTreeCommand>();
+
+        foreach (var entry in createList.ToList())
+        {
+            if (entry.Key != moveCommand && !entry.Key.SaveLocation)
+            {
+                entry.Value.IsCondition = false;
+                destroyableCommands.Add(entry.Value);
+                createList.Remove(entry.Key);
+            }
+        }
+
+        yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(destroyableCommands));
+
+        foreach (var command in destroyableCommands)
+            Destroy(command.gameObject);
+    }
+
+    [SerializeField] private ItemCommand test;
+    public void CreateItem(MoveCommand villageMoveCommand)
+    {
+        MultiTreeCommand command = Instantiate(test, transform);
+        command.transform.localPosition = FindSpawnPosition(command);
         createList.Add(villageMoveCommand, command);
-        command.gameObject.SetActive(false);
     }
 }

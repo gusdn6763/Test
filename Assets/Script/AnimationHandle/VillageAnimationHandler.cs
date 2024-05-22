@@ -12,7 +12,6 @@ public class VillageAnimationHandler : AnimationHandler
                 yield return AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands);
                 break;
             case MouseStatus.Excute:
-                //yield return AnimationManager.instance.AnimationCoroutine(command.ParentCommand.ChildCommands, false);
                 yield return AnimationManager.instance.CommandAllDisable(command);
                 break;
             case MouseStatus.Exit:

@@ -42,7 +42,7 @@ public class AnimationManager : MonoBehaviour
     public IEnumerator AnimationCoroutine(List<MultiTreeCommand> commandList, bool isOn)
     {
         if (animationStack.Contains(commandList))
-            yield return new WaitUntil(() => animationStack.Contains (commandList) == false);
+            yield return new WaitUntil(() => animationStack.Contains(commandList) == false);
 
         animationStack.Add(commandList);
 
@@ -187,10 +187,8 @@ public class AnimationManager : MonoBehaviour
             }
         }
 
-        yield return new WaitUntil(() => IsAnimation == false);
-
-        yield return StartCoroutine(AnimationCoroutine(defaultDisList, false));
         yield return StartCoroutine(InitialAnimationCoroutine(defaultList));
+        yield return StartCoroutine(AnimationCoroutine(defaultDisList, false));
     }
 
     public IEnumerator CommandAllDisable(MultiTreeCommand command)

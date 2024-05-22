@@ -6,8 +6,6 @@ public class LocationList : MonoBehaviour
 {
     [SerializeField] private MoveCommand parentLocation;
 
-    private List<MoveCommand> allMoveCommands = new List<MoveCommand>();
-
     private Graph graph;
     private int locationCount;
 
@@ -37,13 +35,13 @@ public class LocationList : MonoBehaviour
         }
     }
 
-    public void CaculateAllMoveCommandStatus(MoveCommand command)
+    public void CaculateAllMoveCommandStatus(List<MoveCommand> moveCommands, MoveCommand command)
     {
         List<Tuple<MoveCommand, Status>> status = CaculateAllPathsStatusFromName(command.CommandName);
 
-        for (int i = 0; i < allMoveCommands.Count; i++)
+        for (int i = 0; i < moveCommands.Count; i++)
         {
-            MoveCommand childCommand = allMoveCommands[i];
+            MoveCommand childCommand = moveCommands[i];
 
             if (childCommand.Found == false)
                 continue;
@@ -62,10 +60,10 @@ public class LocationList : MonoBehaviour
         }
 
         List<string> listTmp = new List<string>();
-        List<string> list = SearchNearLocationFromName(Player.instance.CurrentLocation);
+        List<string> list = SearchNearLocationFromName(command.CommandName);
         for (int j = 0; j < list.Count; j++)
         {
-            if (FindLocation(list[j]))
+            if (FindLocation(list[j], moveCommands))
                 listTmp.Add("경로 발견 : " + list[j]);
         }
 
@@ -107,9 +105,9 @@ public class LocationList : MonoBehaviour
         return nearLocations;
     }
 
-    public bool FindLocation(string locationName)
+    public bool FindLocation(string locationName, List<MoveCommand> moveCommands)
     {
-        foreach (MoveCommand childCommand in allMoveCommands)
+        foreach (MoveCommand childCommand in moveCommands)
         {
             if (childCommand.CommandName == locationName)
             {

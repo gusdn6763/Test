@@ -4,33 +4,33 @@ using UnityEngine;
 
 public class Area : MonoBehaviour
 {
-    public bool isInteraction = false;
+    public bool IsInteraction { get; set; } = false;
 
     public Vector3 FindSpawnPosition(MultiTreeCommand multiTreeCommand)
     {
-        Vector3 position = multiTreeCommand.transform.position;
+        Vector3 position;
         Vector3 size = multiTreeCommand.GetSize();
 
         // 중복되지 않는 위치 찾기
         do
         {
-            position = GetRandomPosition();
+            position = GetRandomPosition(size);
         } while (CheckOverlap(position, size));
 
         return position;
     }
 
-    public Vector3 GetRandomPosition()
+    public Vector3 GetRandomPosition(Vector3 size)
     {
         float z = transform.position.z;
 
         Vector3 bottomLeft = CameraExtensions.GetBottomLeftPosition(z);
         Vector3 topRight = CameraExtensions.GetTopRightPosition(z);
 
-        float randomX = Random.Range(bottomLeft.x, topRight.x);
-        float randomY = Random.Range(bottomLeft.y, topRight.y);
+        float randomX = Random.Range(bottomLeft.x + size.x * 0.5f, topRight.x - size.x * 0.5f);
+        float randomY = Random.Range(bottomLeft.y + size.y * 0.5f, topRight.y - size.y * 0.5f);
 
-        return new Vector3(randomX, randomY, z);
+        return new Vector3(randomX, randomY, 0);
     }
 
     public bool CheckOverlap(Vector3 position, Vector3 size)
@@ -38,8 +38,8 @@ public class Area : MonoBehaviour
         Collider[] colliders = Physics.OverlapBox(position, size / 2f);
 
         if (colliders.Length == 0)
-            return true;
+            return false;
         
-        return false;
+        return true;
     }
 }

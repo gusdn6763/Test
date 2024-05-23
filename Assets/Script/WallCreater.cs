@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WallCreater : MonoBehaviour
 {
-    private void Awake()
+    private void Start()
     {
         CreateBoundaryColliders();
     }

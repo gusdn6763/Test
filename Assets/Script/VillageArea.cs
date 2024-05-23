@@ -41,7 +41,7 @@ public class VillageArea : Area
 
     private void Update()
     {
-        if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || isInteraction)
+        if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsInteraction)
             return;
 
         CommandActiving();
@@ -306,7 +306,7 @@ public class VillageArea : Area
     public void CreateItem(MoveCommand villageMoveCommand)
     {
         MultiTreeCommand command = Instantiate(test, transform);
-        command.transform.localPosition = FindSpawnPosition(command);
+        command.transform.position = FindSpawnPosition(command);
         createList.Add(villageMoveCommand, command);
     }
 }

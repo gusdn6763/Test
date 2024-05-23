@@ -15,11 +15,11 @@ MonoBehaviour:
   appearanceAnimation:
   - animationString:
     - fade d=0.4
-    waitForNormalChars: 1
+    waitForNormalChars: 0.3
     appearanceAnimationType: 1
   - animationString:
     - fade d=0.4
-    waitForNormalChars: 1
+    waitForNormalChars: 0.3
     appearanceAnimationType: 0
   behaviorAnimation:
   - animationString:

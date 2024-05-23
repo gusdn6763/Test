@@ -1,18 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class VillageCommand : MonoBehaviour
+[RequireComponent(typeof(AnimationHandler))]
+public class VillageCommand : MultiTreeCommand
 {
-    // Start is called before the first frame update
-    void Start()
+    protected AnimationHandler animationHandler;
+    public override void Interaction(MouseStatus mouseStatus)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        base.Interaction(mouseStatus);
+        StartCoroutine(animationHandler.AnimaionCoroutine(this, currentMouseStatus));
     }
 }

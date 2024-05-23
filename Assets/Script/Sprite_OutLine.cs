@@ -15,10 +15,10 @@ public class Sprite_OutLine : Action_Command
     {
         switch (mouseStatus)
         {
-            case MouseStatus.Enter:
+            case MouseStatus.Down:
                 outLine.gameObject.SetActive(true);
                 break;
-            case MouseStatus.Exit:
+            case MouseStatus.Up:
                 outLine.gameObject.SetActive(false);
                 break;
         }

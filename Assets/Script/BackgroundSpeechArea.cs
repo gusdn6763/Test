@@ -48,17 +48,14 @@ public class BackgroundSpeechArea : Area
         {
             while (true)
             {
-                yield return new WaitForSeconds(perSecond);
-
                 if (currentCount < maxCount)
                 {
                     int index = Random.Range(0, poolList.Count - 1);
 
-                    if (poolList[index].isActiveAndEnabled)
-                        continue;
-
-                    SpawnCommand(poolList[index]);
+                    if (poolList[index].isActiveAndEnabled == false)
+                        SpawnCommand(poolList[index]);
                 }
+                yield return new WaitForSeconds(perSecond);
             }
         }
     }
@@ -81,6 +78,7 @@ public class BackgroundSpeechArea : Area
 
         command.DisAppearance();
         yield return new WaitUntil(() => command.IsDisAppearanceStart == false);
+        command.gameObject.SetActive(false);
         currentCount--;
     }
 
@@ -91,7 +89,8 @@ public class BackgroundSpeechArea : Area
             StopCoroutine(currentCoroutine);
 
         foreach (MultiTreeCommand command in poolList)
-            command.DisAppearance();
+            if (command.isActiveAndEnabled)
+                command.DisAppearance();
 
         yield return new WaitUntil(() => poolList.All(cmd => cmd.IsDisAppearanceStart == false));
         currentCount = 0;

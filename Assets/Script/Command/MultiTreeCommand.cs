@@ -31,7 +31,6 @@ public class MultiTreeCommand : MonoBehaviour
     public Action<MouseStatus> onMouseEvent;        //마우스 상호작용시
     public Action<MouseStatus> onAnimationEndEvent; //애니메이션 종료시
 
-    protected AnimationHandler animationHandler;
     protected SpriteList spriteList;
     protected MenuList menuList;
 
@@ -351,7 +350,6 @@ public class MultiTreeCommand : MonoBehaviour
     {
         currentMouseStatus = mouseStatus;
         onMouseEvent?.Invoke(currentMouseStatus);
-        StartCoroutine(animationHandler.AnimaionCoroutine(this, currentMouseStatus));
     }
 
     #endregion
@@ -606,7 +604,7 @@ public class MultiTreeCommand : MonoBehaviour
         foreach (var disappearance in disappearances) disappearance.animation.InitializeOnce();
 
         //Prepares Characters
-        PopulateCharacters(true);
+        PopulateCharacters(false);
         CopyMeshFromSource(ref characters); //초기 데이터 세팅
     }
     void AnimateText(float deltaTime)
@@ -715,7 +713,6 @@ public class MultiTreeCommand : MonoBehaviour
         for (int i = 0; i < characters.Length; i++)
         {
             currentCharInfo = text.textInfo.characterInfo[i];
-            characters[i].isVisible = currentCharInfo.isVisible;
             characters[i].info.character = currentCharInfo.character;
             //Updates TMP char info
             //characters[i].current.tmp_CharInfo = textInfo.characterInfo[i];

@@ -101,16 +101,20 @@ public class AnimationManager : MonoBehaviour
             }
         }
 
+        foreach (MultiTreeCommand command in firstList)
+        {
+            command.Appearance();
+            yield return new WaitUntil(() => command.IsAppearanceStart == false);
+            command.Behavior();
+        }
+
         foreach (MultiTreeCommand command in defaultList)
             command.Appearance();
 
         yield return new WaitUntil(() => defaultList.All(cmd => cmd.IsAppearanceStart == false));
 
-        foreach (MultiTreeCommand command in firstList)
-        {
-            command.Appearance();
-            yield return new WaitUntil(() => command.IsAppearanceStart == false);
-        }
+        foreach (MultiTreeCommand command in defaultList)
+            command.Behavior();
 
         animationStack.Remove(commandList);
     }

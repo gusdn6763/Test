@@ -17,12 +17,12 @@ namespace Febucci.UI.Effects
 
         public override void ApplyEffectTo(ref MyCharacterData character, RectTransform rect)
         {
-            float timePassed = timeMode.GetTime(character.passedTime, character.passedTime, character.index);
+            float timePassed = timeMode.GetTime(character.appearanceTime, character.appearanceTime, character.index);
 
             if (timePassed < 0)
                 return;
 
-            float time = Tween.EaseInOut(character.passedTime / duration);
+            float time = Tween.EaseInOut(character.appearanceTime / duration);
 
             if (time < 1)
             {

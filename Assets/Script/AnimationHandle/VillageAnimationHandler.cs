@@ -11,14 +11,17 @@ public class VillageAnimationHandler : AnimationHandler
             case MouseStatus.Enter:
                 command.CurrentArea.IsWait = true;
                 yield return AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands);
+                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Excute:
                 command.CurrentArea.IsWait = true;
                 yield return AnimationManager.instance.CommandAllDisable(command);
+                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Exit:
                 command.CurrentArea.IsWait = true;
                 yield return AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false);
+                command.CurrentArea.IsWait = false;
                 break;
         }
         AnimationEvent(command, mouseStatus);
@@ -28,6 +31,5 @@ public class VillageAnimationHandler : AnimationHandler
     {
         AnimationManager.instance.DisableCommand();
         command.onAnimationEndEvent?.Invoke(mouseStatus);
-        command.CurrentArea.IsWait = true;
     }
 }

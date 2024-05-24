@@ -94,9 +94,7 @@ public class MultiTreeCommand : MonoBehaviour
         if (text.text.Equals(textWithoutTextAnimTags) == false)
         {
             ConvertText(text.text);
-
             //Prepares Characters
-            PopulateCharacters(false);
             CopyMeshFromSource(ref characters); //초기 데이터 세팅
         }
         else
@@ -385,20 +383,18 @@ public class MultiTreeCommand : MonoBehaviour
     {
         IsAppearanceStart = true;
 
-        ResetTimeAllCharacter();
+        HideAllCharactersTime();
         currentAppearance = animationDataController.GetAppearanceTags();
+        IsFirstAppearance = false;
 
         ConvertText(text.text);
-        PopulateCharacters(false);
         CopyMeshFromSource(ref characters); //초기 데이터 세팅
-
-        IsFirstAppearance = false;
-       
-        HideAllCharactersTime();
         PasteMeshToSource(characters);
 
         for (int i = 0; i < charactersCount; i++)
         {
+            characters[i].ResetAnimation();
+
             SetVisibilityChar(i, true);
 
             if (currentAppearance.waitForNormalChars != 0)
@@ -413,7 +409,6 @@ public class MultiTreeCommand : MonoBehaviour
             yield return null;
         }
         IsAppearanceStart = false;
-        Behavior();
     }
     private Coroutine behaviorCoroutine;
     public void Behavior()
@@ -430,7 +425,7 @@ public class MultiTreeCommand : MonoBehaviour
         for (int i = 0; i < charactersCount; i++)
             characters[i].SaveBeforePositions();
 
-        ResetTimeAllCharacter();
+        ResetPassedTimeAllCharacter();
         currentBehavior = animationDataController.GetBehaviorTags();
         ConvertText(text.text);
 
@@ -460,15 +455,13 @@ public class MultiTreeCommand : MonoBehaviour
     {
         IsDisAppearanceStart = true;
 
-        ResetTimeAllCharacter();
+        ResetAppearanceTimeAllCharacter();
         currentDisAppearance = animationDataController.GetDisAppearanceTags();
         ConvertText(text.text);
 
-        PasteMeshToSource(characters);
-
         for (int i = 0; i < charactersCount; i++)
         {
-            characters[i].passedTime = characters[i].disappearancesMaxDuration;
+            characters[i].appearanceTime = characters[i].disappearancesMaxDuration;
 
             SetVisibilityChar(i, false);
             if (currentDisAppearance.waitForNormalChars != 0)
@@ -478,7 +471,7 @@ public class MultiTreeCommand : MonoBehaviour
 
         for (int i = 0; i < charactersCount; i++)
         {
-            yield return new WaitUntil(() => characters[i].passedTime <= 0);
+            yield return new WaitUntil(() => characters[i].appearanceTime <= 0);
         }
 
         yield return new WaitUntil(() => ChildCommands.All(cmd => cmd.IsDisAppearanceStart == false));
@@ -551,7 +544,11 @@ public class MultiTreeCommand : MonoBehaviour
         foreach (var behavior in behaviors) behavior.animation.InitializeOnce();
         foreach (var appearance in appearances) appearance.animation.InitializeOnce();
         foreach (var disappearance in disappearances) disappearance.animation.InitializeOnce();
+
+        PopulateCharacters(false);
     }
+
+    public float test;
     void AnimateText(float deltaTime)
     {
         if (IsAppearanceStart || IsDisAppearanceStart || IsBehaviorStart)
@@ -561,16 +558,22 @@ public class MultiTreeCommand : MonoBehaviour
             for (int i = 0; i < characters.Length; i++)
             {
                 characters[i].ResetAnimation();
-
-                if (characters[i].isVisible)
-                    characters[i].passedTime += deltaTime;
-                else
-                    characters[i].passedTime -= deltaTime;
-
-                if (characters[i].passedTime <= 0) // "<=" to force hiding characters when TimeScale = 0 
+                
+                characters[i].passedTime += deltaTime;
+                if (i == 0)
+                    test = characters[i].passedTime;
+                if (IsAppearanceStart || IsDisAppearanceStart)
                 {
-                    characters[i].passedTime = 0;
-                    characters[i].Hide();
+                    if (characters[i].isVisible)
+                        characters[i].appearanceTime += deltaTime;
+                    else
+                        characters[i].appearanceTime -= deltaTime;
+
+                    if (characters[i].appearanceTime <= 0) // "<=" to force hiding characters when TimeScale = 0 
+                    {
+                        characters[i].appearanceTime = 0;
+                        characters[i].Hide();
+                    }
                 }
             }
 
@@ -720,17 +723,26 @@ public class MultiTreeCommand : MonoBehaviour
             var c = characters[i];
             c.isVisible = false;
             c.passedTime = 0;
+            c.appearanceTime = 0;
             c.Hide();
             characters[i] = c;
         }
     }
-    public void ResetTimeAllCharacter()
+    public void ResetPassedTimeAllCharacter()
     {
         for (int i = 0; i < charactersCount; i++)
         {
             characters[i].passedTime = 0;
         }
     }
+    public void ResetAppearanceTimeAllCharacter()
+    {
+        for (int i = 0; i < charactersCount; i++)
+        {
+            characters[i].appearanceTime = 0;
+        }
+    }
+
     void PopulateCharacters(bool resetVisibility)
     {
         if (characters.Length < charactersCount)

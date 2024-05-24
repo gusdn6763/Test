@@ -23,6 +23,7 @@ public class RootVillageAnimationHandler : AnimationHandler
                 command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.IsBehaviorAnimationCoroutine(command));
                 yield return StartCoroutine(AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands));
+                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Down:
                 rigi.mass = 0;
@@ -30,11 +31,13 @@ public class RootVillageAnimationHandler : AnimationHandler
                 command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, true));
+                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Up:
                 rigi.velocity = Vector3.zero;
                 command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, false));
+                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Drag:
                 rigi.mass = defaultMass;
@@ -43,12 +46,14 @@ public class RootVillageAnimationHandler : AnimationHandler
             case MouseStatus.Excute:
                 command.CurrentArea.IsWait = true;
                 yield return AnimationManager.instance.CommandAllDisable(command);
+                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Exit:
                 rigi.mass = defaultMass;
                 command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 yield return StartCoroutine(AnimationManager.instance.IsBehaviorAnimationCoroutine(command));
+                command.CurrentArea.IsWait = false;
                 break;
         }
         AnimationEvent(command, mouseStatus);
@@ -56,7 +61,6 @@ public class RootVillageAnimationHandler : AnimationHandler
 
     public override void AnimationEvent(MultiTreeCommand command, MouseStatus mouseStatus)
     {
-        command.CurrentArea.IsWait = false;
         AnimationManager.instance.DisableCommand();
         command.onAnimationEndEvent?.Invoke(mouseStatus);
     }

@@ -33,7 +33,7 @@ namespace Febucci.UI.Effects
                 temp.a = 0;
 
                 character.current.colors[i] = Color32.LerpUnclamped(character.current.colors[i], temp,
-                    Tween.EaseInOut(1 - (character.passedTime / duration)));
+                    Tween.EaseInOut(1 - (character.appearanceTime / duration)));
             }
         }
     }

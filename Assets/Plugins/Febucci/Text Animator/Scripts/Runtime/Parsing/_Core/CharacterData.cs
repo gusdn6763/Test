@@ -68,6 +68,7 @@ namespace Febucci.UI.Core
         public int wordIndex;
         public bool isVisible;
         public float passedTime;
+        public float appearanceTime;
         public float appearancesMaxDuration;
         public float disappearancesMaxDuration;
         public float behaviorMaxDuration;

@@ -16,14 +16,14 @@ MonoBehaviour:
   - animationString:
     - scale d=0.4
     waitForNormalChars: 0
-    appearanceAnimationType: 0
+    conditionType: 1
   - animationString:
     - fade d=0.4
     waitForNormalChars: 0
-    appearanceAnimationType: 1
+    conditionType: 0
   behaviorAnimation: []
   disAppearanceAnimation:
   - animationString:
     - fade d=0.4
     waitForNormalChars: 0
-    disAppearanceAnimationType: 0
+    conditionType: 0

@@ -11,6 +11,7 @@ public class TextOutLine : MonoBehaviour
     {
         multiTreeCommand = GetComponentInParent<MultiTreeCommand>();
         rectTransform = GetComponent<RectTransform>();
+        gameObject.SetActive(false);
     }
 
     private void OnEnable()

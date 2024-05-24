@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Area : MonoBehaviour
 {
-    public bool IsInteraction { get; set; } = false;
+    public bool IsWait { get; set; } = false;
 
     public Vector3 FindSpawnPosition(MultiTreeCommand multiTreeCommand)
     {
@@ -24,8 +24,8 @@ public class Area : MonoBehaviour
     {
         float z = transform.position.z;
 
-        Vector3 bottomLeft = CameraExtensions.GetBottomLeftPosition(z);
-        Vector3 topRight = CameraExtensions.GetTopRightPosition(z);
+        Vector3 bottomLeft = Utils.GetBottomLeftPosition(z);
+        Vector3 topRight = Utils.GetTopRightPosition(z);
 
         float randomX = Random.Range(bottomLeft.x + size.x * 0.5f, topRight.x - size.x * 0.5f);
         float randomY = Random.Range(bottomLeft.y + size.y * 0.5f, topRight.y - size.y * 0.5f);

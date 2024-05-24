@@ -1,12 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum AppearanceAnimationType
-{
-    First,
-    Default,
-}
-
 [System.Serializable]
 public struct AppearanceAnimationScriptible
 {
@@ -16,15 +10,17 @@ public struct AppearanceAnimationScriptible
     public float waitForNormalChars;
 
     [Header("애니메이션 타입")]
-    public AppearanceAnimationType appearanceAnimationType;
-}
+    public AnimationConditionType conditionType;
 
-public enum BehaviorAnimationType
-{
-    Default,
-    Enter,
-    Clicking,
-    Up
+    public static AppearanceAnimationScriptible GetDefault()
+    {
+        return new AppearanceAnimationScriptible
+        {
+            animationString = null,
+            waitForNormalChars = 0f,
+            conditionType = AnimationConditionType.Default
+        };
+    }
 }
 
 [System.Serializable]
@@ -33,15 +29,20 @@ public struct BehaviorAnimationScriptible
     public string[] animationString;
 
     [Header("애니메이션 타입")]
-    public BehaviorAnimationType behaviorAnimationType;
+    public AnimationConditionType conditionType;
 
     public bool isLoop;
+    public static BehaviorAnimationScriptible GetDefault()
+    {
+        return new BehaviorAnimationScriptible
+        {
+            animationString = null,
+            isLoop = false,
+            conditionType = AnimationConditionType.Default
+        };
+    }
 }
 
-public enum DisAppearanceAnimationType
-{
-    Default,
-}
 [System.Serializable]
 public struct DisAppearanceAnimationScriptible
 {
@@ -51,11 +52,15 @@ public struct DisAppearanceAnimationScriptible
     public float waitForNormalChars;
 
     [Header("애니메이션 타입")]
-    public DisAppearanceAnimationType disAppearanceAnimationType;
-}
+    public AnimationConditionType conditionType;
 
-[System.Serializable]
-public struct RevertScriptible
-{
-    public float revertTime;
+    public static DisAppearanceAnimationScriptible GetDefault()
+    {
+        return new DisAppearanceAnimationScriptible
+        {
+            animationString = null,
+            waitForNormalChars = 0f,
+            conditionType = AnimationConditionType.Default
+        };
+    }
 }

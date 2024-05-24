@@ -10,22 +10,11 @@ using UnityEngine;
 using Febucci.UI.Actions;
 using System.Linq;
 
-public enum MouseStatus
-{
-    None,
-    Enter,
-    Down,
-    Drag,
-    Up,
-    Excute,
-    Exit,
-}
-
-[RequireComponent(typeof(AnimationHandler))]
 public class MultiTreeCommand : MonoBehaviour
 {
-    [SerializeField] protected AnimationData animationData;
-    public Area CurrentArea { get; set; }
+    private AnimationDataController animationDataController;
+
+    public Area CurrentArea { get { return GetComponentInParent<Area>(); } }
 
     public Action<bool> isConditionEvent;           //활성화 여부 상호작용시
     public Action<MouseStatus> onMouseEvent;        //마우스 상호작용시
@@ -58,7 +47,7 @@ public class MultiTreeCommand : MonoBehaviour
 
     protected virtual void Awake()
     {
-        animationHandler = GetComponent<AnimationHandler>();
+        animationDataController = GetComponent<AnimationDataController>();
         spriteList = GetComponentInChildren<SpriteList>(true);
         menuList = GetComponentInChildren<MenuList>(true);
 
@@ -105,6 +94,10 @@ public class MultiTreeCommand : MonoBehaviour
         if (text.text.Equals(textWithoutTextAnimTags) == false)
         {
             ConvertText(text.text);
+
+            //Prepares Characters
+            PopulateCharacters(false);
+            CopyMeshFromSource(ref characters); //초기 데이터 세팅
         }
         else
             AnimateText(Time.deltaTime);
@@ -345,29 +338,27 @@ public class MultiTreeCommand : MonoBehaviour
     #endregion
 
     #region 마우스 상호작용
-    protected MouseStatus currentMouseStatus;
+    public MouseStatus CurrentMouseStatus { get; set; }
     public virtual void Interaction(MouseStatus mouseStatus)
     {
-        currentMouseStatus = mouseStatus;
-        onMouseEvent?.Invoke(currentMouseStatus);
+        CurrentMouseStatus = mouseStatus;
+        onMouseEvent?.Invoke(CurrentMouseStatus);
     }
 
     #endregion
 
     #region 애니메이션
 
-    public bool IsAppearanceStart { get; set; }           //생성시작
-    public bool IsDisAppearanceStart { get; set; }        //사라짐시작
-    public bool IsBehaviorStart { get; set; }             //행동애니메이션 시작
-    public bool IsFirstAppearance { get; set; } = true;
+    public bool IsAppearanceStart { get; private set; }           //생성시작
+    public bool IsDisAppearanceStart { get; private set; }        //사라짐시작
+    public bool IsBehaviorStart { get; private set; }             //행동애니메이션 시작
+    public bool IsFirstAppearance { get; private set; } = true;
     public bool IsLoop { get => currentBehavior.isLoop; }
     public float FontSize { get => text.fontSize; }
 
     private int charactersCount;
-    public int CharactersCount { get => charactersCount; }
 
     private MyCharacterData[] characters;
-    public MyCharacterData[] Characters { get => characters; }
 
     protected AppearanceAnimationScriptible currentAppearance;
     protected BehaviorAnimationScriptible currentBehavior;
@@ -394,8 +385,12 @@ public class MultiTreeCommand : MonoBehaviour
     {
         IsAppearanceStart = true;
 
-        currentAppearance = GetAppearanceTags();
+        ResetTimeAllCharacter();
+        currentAppearance = animationDataController.GetAppearanceTags();
+
         ConvertText(text.text);
+        PopulateCharacters(false);
+        CopyMeshFromSource(ref characters); //초기 데이터 세팅
 
         IsFirstAppearance = false;
        
@@ -420,38 +415,6 @@ public class MultiTreeCommand : MonoBehaviour
         IsAppearanceStart = false;
         Behavior();
     }
-    public void DisAppearance()
-    {
-        StartCoroutine(DisAppearanceCoroutine());
-    }
-    IEnumerator DisAppearanceCoroutine()
-    {
-        IsDisAppearanceStart = true;
-
-        currentDisAppearance = GetDisAppearanceTags();
-        ConvertText(text.text);
-
-        PasteMeshToSource(characters);
-
-        for (int i = 0; i < charactersCount; i++)
-        {
-            characters[i].passedTime = characters[i].disappearancesMaxDuration;
-            SetVisibilityChar(i, false);
-            if (currentAppearance.waitForNormalChars != 0)
-                yield return new WaitForSeconds(currentDisAppearance.waitForNormalChars);
-        }
-
-
-        for (int i = 0; i < charactersCount; i++)
-        {
-            yield return new WaitUntil(() => characters[i].passedTime <= 0);
-        }
-
-        yield return new WaitUntil(() => ChildCommands.All(cmd => cmd.IsDisAppearanceStart == false));
-
-        IsDisAppearanceStart = false;
-    }
-
     private Coroutine behaviorCoroutine;
     public void Behavior()
     {
@@ -467,7 +430,8 @@ public class MultiTreeCommand : MonoBehaviour
         for (int i = 0; i < charactersCount; i++)
             characters[i].SaveBeforePositions();
 
-        currentBehavior = GetBehaviorTags();
+        ResetTimeAllCharacter();
+        currentBehavior = animationDataController.GetBehaviorTags();
         ConvertText(text.text);
 
         if (currentBehavior.isLoop)
@@ -488,59 +452,44 @@ public class MultiTreeCommand : MonoBehaviour
 
         IsBehaviorStart = false;
     }
-    public T GetAnimationTags<T>(List<T> animationList, Func<T, bool> predicate) where T : new()
+    public void DisAppearance()
     {
-        ResetTimeAllCharacter();
+        StartCoroutine(DisAppearanceCoroutine());
+    }
+    IEnumerator DisAppearanceCoroutine()
+    {
+        IsDisAppearanceStart = true;
 
-        foreach (T animation in animationList)
+        ResetTimeAllCharacter();
+        currentDisAppearance = animationDataController.GetDisAppearanceTags();
+        ConvertText(text.text);
+
+        PasteMeshToSource(characters);
+
+        for (int i = 0; i < charactersCount; i++)
         {
-            if (predicate(animation))
-                return animation;
+            characters[i].passedTime = characters[i].disappearancesMaxDuration;
+
+            SetVisibilityChar(i, false);
+            if (currentDisAppearance.waitForNormalChars != 0)
+                yield return new WaitForSeconds(currentDisAppearance.waitForNormalChars);
         }
 
-        return new T();
-    }
-    public virtual AppearanceAnimationScriptible GetAppearanceTags()
-    {
-        return GetAnimationTags(animationData.appearanceAnimation, animation =>
+
+        for (int i = 0; i < charactersCount; i++)
         {
-            if (IsFirstAppearance)
-                return animation.appearanceAnimationType == AppearanceAnimationType.First;
-            else
-                return animation.appearanceAnimationType == AppearanceAnimationType.Default;
-        });
-    }
-    public virtual BehaviorAnimationScriptible GetBehaviorTags()
-    {
-        return GetAnimationTags(animationData.behaviorAnimation, animation =>
-        {
-            switch (currentMouseStatus)
-            {
-                case MouseStatus.Enter:
-                    return animation.behaviorAnimationType == BehaviorAnimationType.Enter;
-                case MouseStatus.Down:
-                    return animation.behaviorAnimationType == BehaviorAnimationType.Clicking;
-                case MouseStatus.Up:
-                    return animation.behaviorAnimationType == BehaviorAnimationType.Up;
-                default:
-                    return animation.behaviorAnimationType == BehaviorAnimationType.Default;
-            }
-        });
-    }
-    public virtual DisAppearanceAnimationScriptible GetDisAppearanceTags()
-    {
-        return GetAnimationTags(animationData.disAppearanceAnimation, animation =>
-        {
-            return animation.disAppearanceAnimationType == DisAppearanceAnimationType.Default;
-        });
+            yield return new WaitUntil(() => characters[i].passedTime <= 0);
+        }
+
+        yield return new WaitUntil(() => ChildCommands.All(cmd => cmd.IsDisAppearanceStart == false));
+
+        IsDisAppearanceStart = false;
     }
 
     public void Show(bool isOn)
     {
         text.enabled = isOn ? true : false;
     }
-    #endregion
-
     void ConvertText(string textToParse)
     {
         if (textToParse is null) // prevents error along the method if text is passed as null
@@ -602,10 +551,6 @@ public class MultiTreeCommand : MonoBehaviour
         foreach (var behavior in behaviors) behavior.animation.InitializeOnce();
         foreach (var appearance in appearances) appearance.animation.InitializeOnce();
         foreach (var disappearance in disappearances) disappearance.animation.InitializeOnce();
-
-        //Prepares Characters
-        PopulateCharacters(false);
-        CopyMeshFromSource(ref characters); //초기 데이터 세팅
     }
     void AnimateText(float deltaTime)
     {
@@ -647,6 +592,7 @@ public class MultiTreeCommand : MonoBehaviour
             PasteMeshToSource(characters);
         }
     }
+    #endregion
 
     #region 보조 함수
     public void PositionInitialize()
@@ -778,7 +724,7 @@ public class MultiTreeCommand : MonoBehaviour
             characters[i] = c;
         }
     }
-    void ResetTimeAllCharacter()
+    public void ResetTimeAllCharacter()
     {
         for (int i = 0; i < charactersCount; i++)
         {

@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 6716012950951505238}
   - component: {fileID: 2128469094927813415}
   - component: {fileID: 2542817748475541479}
-  m_Layer: 6
+  - component: {fileID: 4648638821931275543}
+  m_Layer: 0
   m_Name: Speech5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -237,7 +238,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24229bcbdf10f9047a59bd94ad5800c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animationData: {fileID: 11400000, guid: cb6adba7a7b94a24cb3f0623d8d4c4db, type: 2}
   commandName: "\"\uB9DB\uC788\uB294 \uC19C\uC0AC\uD0D5 1\uAC1C\uC5D0 1\uACE8\uB4DC\""
   isCondition: 1
 --- !u!114 &2542817748475541479
@@ -252,6 +252,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b1643f08e535094fad075a37f892345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4648638821931275543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 28797152580033273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a97fbf39199ab0f44a09ca699386437e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animationData: {fileID: 11400000, guid: cb6adba7a7b94a24cb3f0623d8d4c4db, type: 2}
 --- !u!1 &4724691397167897133
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,7 +275,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9049671837981698700}
   - component: {fileID: 3374331911946598203}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Sprites
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -311,7 +324,7 @@ GameObject:
   - component: {fileID: 3895164148737171107}
   - component: {fileID: 5183631957960286669}
   - component: {fileID: 8784145896836686462}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Menus
   m_TagString: Untagged
   m_Icon: {fileID: 0}

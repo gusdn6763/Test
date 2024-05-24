@@ -51,10 +51,10 @@ public class Walls : MonoBehaviour
     public void SetBoundaryColliderPositions()
     {
         // 카메라 위치를 기준으로 경계 좌표 계산
-        Vector3 bottomLeft = CameraExtensions.GetBottomLeftPosition(transform.position.z);
-        Vector3 bottomRight = CameraExtensions.GetBottomRightPosition(transform.position.z);
-        Vector3 topLeft = CameraExtensions.GetTopLeftPosition(transform.position.z);
-        Vector3 topRight = CameraExtensions.GetTopRightPosition(transform.position.z);
+        Vector3 bottomLeft = Utils.GetBottomLeftPosition(transform.position.z);
+        Vector3 bottomRight = Utils.GetBottomRightPosition(transform.position.z);
+        Vector3 topLeft = Utils.GetTopLeftPosition(transform.position.z);
+        Vector3 topRight = Utils.GetTopRightPosition(transform.position.z);
 
         // 상단 콜라이더 위치 및 크기 설정
         topWall.transform.localPosition = new Vector3(0f, topRight.y - transform.position.y + OffsetSize, 0f);

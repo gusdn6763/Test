@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [System.Serializable]
 public class BackgroundData
@@ -50,10 +52,13 @@ public class BackgroundSpeechArea : Area
             {
                 if (currentCount < maxCount)
                 {
-                    int index = Random.Range(0, poolList.Count - 1);
+                    int index;
+                    do
+                    {
+                        index = Random.Range(0, poolList.Count - 1);
+                    } while (poolList[index].isActiveAndEnabled);
 
-                    if (poolList[index].isActiveAndEnabled == false)
-                        SpawnCommand(poolList[index]);
+                    SpawnCommand(poolList[index]);
                 }
                 yield return new WaitForSeconds(perSecond);
             }
@@ -90,7 +95,10 @@ public class BackgroundSpeechArea : Area
 
         foreach (MultiTreeCommand command in poolList)
             if (command.isActiveAndEnabled)
+            {
+                command.StopAllCoroutines();
                 command.DisAppearance();
+            }
 
         yield return new WaitUntil(() => poolList.All(cmd => cmd.IsDisAppearanceStart == false));
         currentCount = 0;

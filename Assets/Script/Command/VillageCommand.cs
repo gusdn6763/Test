@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[RequireComponent(typeof(AnimationHandler))]
 public class VillageCommand : MultiTreeCommand
 {
     protected AnimationHandler animationHandler;
+
+    protected override void Awake()
+    {
+        animationHandler = GetComponent<AnimationHandler>();
+        base.Awake();
+    }
     public override void Interaction(MouseStatus mouseStatus)
     {
         base.Interaction(mouseStatus);
-        StartCoroutine(animationHandler.AnimaionCoroutine(this, currentMouseStatus));
+        StartCoroutine(animationHandler.AnimaionCoroutine(this, CurrentMouseStatus));
     }
 }

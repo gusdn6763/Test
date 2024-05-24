@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class CameraExtensions
+public static class Utils
 {
     private static void CalculateCameraExtents(float zPosition, out float halfWidth, out float halfHeight)
     {

@@ -319,17 +319,16 @@ public class MultiTreeCommand : MonoBehaviour
             ChangeLayerRecursively(child, layerMask);
     }
     #region 사이즈 조절
-    public Vector2 GetSize()
+    public Vector3 GetSize()
     {
-        return new Vector2(text.preferredWidth, text.preferredHeight);
+        return new Vector3(text.preferredWidth + padding.x, text.preferredHeight + padding.y, 1);
     }
-    public void SetSize(Vector2 size)
+    private void SetSize(Vector3 size)
     {
-        Vector2 offsetSize = new Vector2(size.x + padding.x, size.y + padding.y);
-        rect.sizeDelta = offsetSize;
-        box.size = new Vector3(offsetSize.x, offsetSize.y, 1);
+        rect.sizeDelta = size;
+        box.size = size;
 
-        spriteList.SetSize(offsetSize);
+        spriteList.SetSize(size);
     }
 
     #endregion
@@ -374,6 +373,15 @@ public class MultiTreeCommand : MonoBehaviour
     private float referenceFontSize = 10;
 
     #region 애니메이션 실행 부분
+    void OnDrawGizmos()
+    {
+        if (text != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawCube(transform.position, GetSize());
+        }
+    }
+
     public void Appearance()
     {
         gameObject.SetActive(true);
@@ -548,7 +556,6 @@ public class MultiTreeCommand : MonoBehaviour
         PopulateCharacters(false);
     }
 
-    public float test;
     void AnimateText(float deltaTime)
     {
         if (IsAppearanceStart || IsDisAppearanceStart || IsBehaviorStart)
@@ -560,8 +567,7 @@ public class MultiTreeCommand : MonoBehaviour
                 characters[i].ResetAnimation();
                 
                 characters[i].passedTime += deltaTime;
-                if (i == 0)
-                    test = characters[i].passedTime;
+
                 if (IsAppearanceStart || IsDisAppearanceStart)
                 {
                     if (characters[i].isVisible)

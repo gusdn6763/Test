@@ -11,7 +11,7 @@ public class SpriteList : MonoBehaviour
         rectTrans = GetComponent<RectTransform>();
     }
 
-    public void SetSize(Vector2 size)
+    public void SetSize(Vector3 size)
     {
         rectTrans.sizeDelta = size;
     }

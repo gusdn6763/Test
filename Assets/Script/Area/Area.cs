@@ -27,19 +27,18 @@ public class Area : MonoBehaviour
         Vector3 bottomLeft = Utils.GetBottomLeftPosition(z);
         Vector3 topRight = Utils.GetTopRightPosition(z);
 
-        float randomX = Random.Range(bottomLeft.x + size.x * 0.5f, topRight.x - size.x * 0.5f);
-        float randomY = Random.Range(bottomLeft.y + size.y * 0.5f, topRight.y - size.y * 0.5f);
+        float randomX = Random.Range(bottomLeft.x + size.x, topRight.x - size.x);
+        float randomY = Random.Range(bottomLeft.y + size.y, topRight.y - size.y);
 
-        return new Vector3(randomX, randomY, 0);
+        return new Vector3(randomX, randomY, z);
     }
 
+    public Vector3 testPos1;
+    public Vector3 testSize1;
     public bool CheckOverlap(Vector3 position, Vector3 size)
     {
         Collider[] colliders = Physics.OverlapBox(position, size / 2f);
 
-        if (colliders.Length == 0)
-            return false;
-        
-        return true;
+        return colliders.Length > 0;
     }
 }

@@ -19,7 +19,7 @@ MonoBehaviour:
     conditionType: 0
   behaviorAnimation:
   - animationString:
-    - wave a=0.3 w=0.5 f=0.3
+    - wave a=0.03 w=0.5 f=0.3
     conditionType: 0
     isLoop: 1
   disAppearanceAnimation:

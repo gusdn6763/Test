@@ -11,7 +11,7 @@ public class VillageArea : Area
     [SerializeField] private MoveCommand startPosition;
 
     //생성된 아이템들
-    private Dictionary<MoveCommand, MultiTreeCommand> createList = new Dictionary<MoveCommand, MultiTreeCommand>();
+    private Dictionary<MoveCommand, List<MultiTreeCommand>> createList = new Dictionary<MoveCommand, List<MultiTreeCommand>>();
     private List<MoveCommand> moveCommands = new List<MoveCommand>();
     private MoveCommand currentMoveCommand;
 
@@ -234,9 +234,6 @@ public class VillageArea : Area
 
         IsWait = true;
 
-        //테스트용
-        CreateItem(command);
-
         if (command.alternativeLocation)
         {
             yield return MoveLocationCoroutine(command.alternativeLocation);
@@ -274,13 +271,17 @@ public class VillageArea : Area
         //장소 이동
         Player.instance.CurrentLocation = command.CommandName;
 
-        //장소 이동한 오브젝트 활성화
+        //테스트용
+        for(int i = 0; i < 10; i++)
+            CreateItem(command);
+
+        //기타 오브젝트 활성화
         {
             List<MultiTreeCommand> commands = new List<MultiTreeCommand>();
 
-            foreach (var entry in createList.ToList())
-                if (entry.Key == command)
-                    commands.Add(entry.Value);
+            //장소 고유 오브젝트 찾기
+            if (createList.ContainsKey(command))
+                commands.AddRange(createList[command]);
 
             yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(commands));
         }
@@ -296,16 +297,16 @@ public class VillageArea : Area
     {
         List<MultiTreeCommand> destroyCommands = new List<MultiTreeCommand>();
 
-        foreach (var entry in createList.ToList())
+        if (createList.ContainsKey(moveCommand))
         {
-            if (entry.Key == moveCommand)
+            foreach (var command in createList[moveCommand])
             {
-                entry.Value.IsCondition = false;
-                destroyCommands.Add(entry.Value);
-
-                if (moveCommand.SaveLocation == false)
-                    createList.Remove(moveCommand);
+                command.IsCondition = false;
+                destroyCommands.Add(command);
             }
+
+            if (moveCommand.SaveLocation == false)
+                createList.Remove(moveCommand);
         }
 
         yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(destroyCommands));
@@ -321,8 +322,12 @@ public class VillageArea : Area
     public void CreateItem(MoveCommand villageMoveCommand)
     {
         MultiTreeCommand command = Instantiate(test, transform);
-        command.transform.localPosition = FindSpawnPosition(command);
+        command.transform.position = FindSpawnPosition(command);
         command.gameObject.SetActive(false);
-        createList.Add(villageMoveCommand, command);
+
+        if (createList.ContainsKey(villageMoveCommand) == false)
+            createList[villageMoveCommand] = new List<MultiTreeCommand>();
+
+        createList[villageMoveCommand].Add(command);
     }
 }

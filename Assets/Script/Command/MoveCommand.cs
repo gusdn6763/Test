@@ -3,11 +3,9 @@ using UnityEngine;
 
 public class MoveCommand : VillageCommand
 {
-    [Header("소모값")]
-    [SerializeField] private Status defaultStatus;
-    private Status currentStatus = new Status();
-    public Status DefaultStatus { get => defaultStatus; set => defaultStatus = value; }
-    public Status MyStatus { get => DefaultStatus; set => currentStatus = value; }
+    [Header("현재 소모값")]
+    public Status currentStatus;
+    public Status MyStatus { get => currentStatus; set => currentStatus = value; }
 
     [Header("찾음 여부")]
     [SerializeField] private bool found;

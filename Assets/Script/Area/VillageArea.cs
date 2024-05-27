@@ -1,21 +1,21 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class VillageArea : Area
 {
+    //기본 최상위 행동
     [SerializeField] private List<MultiTreeCommand> defaultCommands = new List<MultiTreeCommand>();
+
+    //백그라운드 대사 효과
     [SerializeField] private BackgroundSpeechArea backgroundSpeechArea;
+
     [SerializeField] private MoveCommand startPosition;
 
-    //생성된 아이템들
-    private Dictionary<MoveCommand, List<MultiTreeCommand>> createList = new Dictionary<MoveCommand, List<MultiTreeCommand>>();
-    private List<MoveCommand> moveCommands = new List<MoveCommand>();
-    private MoveCommand currentMoveCommand;
-
     private Stack<MultiTreeCommand> selectCommandStack = new Stack<MultiTreeCommand>();
+    private MoveCommand currentMoveCommand;
     private LocationList locationList;
 
     #region 이동 및 상호작용 관련
@@ -41,8 +41,8 @@ public class VillageArea : Area
     {
         DisAbleAllCommand();
 
-        startPosition.onMouseEvent.Invoke(MouseStatus.Excute);
-        startPosition.onAnimationEndEvent.Invoke(MouseStatus.Excute);
+        startPosition.onMouseEvent?.Invoke(MouseStatus.Excute);
+        startPosition.onAnimationEndEvent?.Invoke(MouseStatus.Excute);
     }
 
     private void Update()
@@ -59,14 +59,10 @@ public class VillageArea : Area
 
         foreach (MultiTreeCommand command in commands)
         {
-            if (command.IsRootCommand)
-                command.DisableAllCommandFromBottom();
-
+            command.gameObject.SetActive(false);
             if (command is MoveCommand)
             {
                 MoveCommand moveCommand = command as MoveCommand;
-
-                moveCommands.Add(moveCommand);
 
                 moveCommand.onAnimationEndEvent += (status) =>
                 {
@@ -146,7 +142,7 @@ public class VillageArea : Area
     public void Interaction(MultiTreeCommand multiTreeCommand, MouseStatus mouseStatus)
     {
         currentMouseStatus = mouseStatus;
-        Debug.Log(currentMouseStatus);
+        //Debug.Log(currentMouseStatus);
 
         if (mouseStatus == MouseStatus.Enter)
         {
@@ -244,7 +240,7 @@ public class VillageArea : Area
                 command.IsCondition = false;
         }
 
-        locationList.CaculateAllMoveCommandStatus(moveCommands, command);
+        locationList.CaculateAllMoveCommandStatus(command);
 
         //이전 지역 정보 비활성화
         if (currentMoveCommand)
@@ -261,31 +257,34 @@ public class VillageArea : Area
 
         if (currentMoveCommand)
         {
-            //이전 장소 고유 오브젝트 비활성화
+            //이전 장소 고유 오브젝트 And 아이템류 비활성화
             yield return StartCoroutine(DisActiveCommandCoroutine(currentMoveCommand));
 
             //이전 장소 백그라운드 대사효과 비활성화
-            yield return(StartCoroutine(backgroundSpeechArea.DisableSpeech()));
+            yield return (StartCoroutine(backgroundSpeechArea.DisableSpeech()));
         }
 
         //장소 이동
         Player.instance.CurrentLocation = command.CommandName;
 
-        //테스트용
-        for(int i = 0; i < 10; i++)
-            CreateItem(command);
-
         //기타 오브젝트 활성화
         {
+            LocationCommandList locationCommandList = locationList.GetLocationCommandList(command);
+
             List<MultiTreeCommand> commands = new List<MultiTreeCommand>();
 
+            //테스트용
+            CreateItem(command);
+
             //장소 고유 오브젝트 찾기
-            if (createList.ContainsKey(command))
-                commands.AddRange(createList[command]);
+            foreach (MultiTreeCommandBool multiTreeCommandBool in locationCommandList.multiTreeCommands)
+            {
+                multiTreeCommandBool.multiTreeCommand.IsCondition = true;
+                commands.Add(multiTreeCommandBool.multiTreeCommand);
+            }
 
             yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(commands));
         }
-        AnimationManager.instance.DestoryCommand();
         //장소 백그라운드 대사효과 활성화
          backgroundSpeechArea.SpeechStart(command);
 
@@ -296,26 +295,30 @@ public class VillageArea : Area
     private IEnumerator DisActiveCommandCoroutine(MoveCommand moveCommand)
     {
         List<MultiTreeCommand> destroyCommands = new List<MultiTreeCommand>();
+        List<MultiTreeCommand> disableCommands = new List<MultiTreeCommand>();
 
-        if (createList.ContainsKey(moveCommand))
+        LocationCommandList locationCommandList = locationList.GetLocationCommandList(moveCommand);
+
+        for (int i = 0; i < locationCommandList.multiTreeCommands.Count; i++)
         {
-            foreach (var command in createList[moveCommand])
-            {
-                command.IsCondition = false;
-                destroyCommands.Add(command);
-            }
+            MultiTreeCommandBool multiTreeCommandBool = locationCommandList.multiTreeCommands[i];
 
-            if (moveCommand.SaveLocation == false)
-                createList.Remove(moveCommand);
+            multiTreeCommandBool.multiTreeCommand.IsCondition = false;
+
+            disableCommands.Add(multiTreeCommandBool.multiTreeCommand);
+
+            if (moveCommand.SaveLocation == false && multiTreeCommandBool.isDestory)
+            {
+                locationCommandList.multiTreeCommands.Remove(multiTreeCommandBool);
+                destroyCommands.Add(multiTreeCommandBool.multiTreeCommand);
+            }
         }
 
-        yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(destroyCommands));
+        yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(disableCommands));
+        AnimationManager.instance.DisableCommand();
 
         foreach (var command in destroyCommands)
-        {
-            if (moveCommand.SaveLocation == false)
-                Destroy(command.gameObject);
-        }
+            Destroy(command.gameObject);
     }
 
     [SerializeField] private ItemCommand test;
@@ -325,9 +328,13 @@ public class VillageArea : Area
         command.transform.position = FindSpawnPosition(command);
         command.gameObject.SetActive(false);
 
-        if (createList.ContainsKey(villageMoveCommand) == false)
-            createList[villageMoveCommand] = new List<MultiTreeCommand>();
-
-        createList[villageMoveCommand].Add(command);
+        LocationCommandList locationCommandList = locationList.GetLocationCommandList(villageMoveCommand);
+        if (locationCommandList != null)
+        {
+            MultiTreeCommandBool multiTreeCommandBool = new MultiTreeCommandBool();
+            multiTreeCommandBool.multiTreeCommand = command;
+            multiTreeCommandBool.isDestory = true;
+            locationCommandList.multiTreeCommands.Add(multiTreeCommandBool);
+        }
     }
 }

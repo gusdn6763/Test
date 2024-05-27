@@ -10,7 +10,6 @@ public class PrefabManager : MonoBehaviour
     public TextOutLine outLine;
     public GameObject initCircle;
 
-
     protected void Awake()
     {
         if (instance == null)

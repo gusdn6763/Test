@@ -14,7 +14,10 @@ public class BlurManager : MonoBehaviour
 
     public bool BlurStart { get; private set; }
 
+    [Header("증가별 대기시간")]
     [SerializeField] private float waitTime;
+
+    [Header("Weight 증가량")]
     [SerializeField] private float value;
 
     private DepthOfField field;

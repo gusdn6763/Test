@@ -15,7 +15,7 @@ public class Graph
             list[i] = new List<Tuple<int, Status>>();
     }
 
-    public void AddEdge(MoveCommand from, MoveCommand to)
+    public void AddEdge(MoveCommand from, MoveCommand to, Status fromStatus, Status toStatus)
     {
         if (locations.Contains(from) == false)
             locations.Add(from);
@@ -23,8 +23,8 @@ public class Graph
         if (locations.Contains(to) == false)
             locations.Add(to);
 
-        list[from.Vertex].Add(new Tuple<int, Status>(to.Vertex, new Status(to.MyStatus)));
-        list[to.Vertex].Add(new Tuple<int, Status>(from.Vertex, new Status(to.MyStatus)));
+        list[from.Vertex].Add(new Tuple<int, Status>(to.Vertex, toStatus));
+        list[to.Vertex].Add(new Tuple<int, Status>(from.Vertex, fromStatus));
     }
 
     public int GetVertexFromName(string locationName)

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Area : MonoBehaviour
 {
-    public bool IsWait { get; set; } = false;
+    public bool IsWait = false;
 
     public Vector3 FindSpawnPosition(MultiTreeCommand multiTreeCommand)
     {
@@ -33,8 +33,6 @@ public class Area : MonoBehaviour
         return new Vector3(randomX, randomY, z);
     }
 
-    public Vector3 testPos1;
-    public Vector3 testSize1;
     public bool CheckOverlap(Vector3 position, Vector3 size)
     {
         Collider[] colliders = Physics.OverlapBox(position, size / 2f);

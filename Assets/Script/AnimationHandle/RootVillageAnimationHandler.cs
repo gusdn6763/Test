@@ -1,9 +1,16 @@
+using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditorInternal.ReorderableList;
 
 [RequireComponent(typeof(Rigidbody))]
 public class RootVillageAnimationHandler : AnimationHandler
 {
+    [Range(0, 50)] [SerializeField] private float speed;
+    [SerializeField] private bool type;
+
+
     private Rigidbody rigi;
     private float defaultMass;
     private float drfaultDrag;
@@ -20,40 +27,50 @@ public class RootVillageAnimationHandler : AnimationHandler
         switch (mouseStatus)
         {
             case MouseStatus.Enter:
-                command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.IsBehaviorAnimationCoroutine(command));
                 yield return StartCoroutine(AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands));
-                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Down:
-                rigi.mass = 0;
-                rigi.drag = 0;
-                command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, true));
-                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Up:
+                rigi.mass = defaultMass;
+                rigi.drag = drfaultDrag;
                 rigi.velocity = Vector3.zero;
-                command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, false));
-                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Drag:
-                rigi.mass = defaultMass;
-                rigi.velocity = (MoveCommand() - transform.position).normalized * 10f;
+                rigi.mass = 1;
+                rigi.drag = 0;
+
+                if (type == false)
+                {
+                    Vector3 mousePosition = MoveCommand();
+                    Vector3 direction = (mousePosition - transform.position).normalized;
+                    float distance = Vector3.Distance(mousePosition, transform.position);
+
+                    float clampedSpeed = speed;
+                    float minDistance = 1f; // 속도를 제한할 최소 거리 값
+                    if (distance < minDistance)
+                        clampedSpeed = Mathf.Clamp(speed, 0f, speed * (distance / minDistance));
+
+                    rigi.velocity = direction * clampedSpeed;
+                }
+                else
+                {
+                    Vector3 mousePosition = MoveCommand();
+                    Vector3 direction = (mousePosition - transform.position);
+                    Vector3 newVelocity = direction * speed;
+                    rigi.velocity = Vector3.Lerp(rigi.velocity, newVelocity, Time.deltaTime * speed);
+                }
                 break;
             case MouseStatus.Excute:
-                command.CurrentArea.IsWait = true;
                 yield return AnimationManager.instance.CommandAllDisable(command);
-                command.CurrentArea.IsWait = false;
                 break;
             case MouseStatus.Exit:
-                rigi.mass = defaultMass;
-                command.CurrentArea.IsWait = true;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 yield return StartCoroutine(AnimationManager.instance.IsBehaviorAnimationCoroutine(command));
-                command.CurrentArea.IsWait = false;
                 break;
         }
         AnimationEvent(command, mouseStatus);
@@ -84,9 +101,11 @@ public class RootVillageAnimationHandler : AnimationHandler
         return clampedWorldPosition;
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        Debug.Log("충돌");
-        rigi.AddForce((transform.position - collision.transform.position).normalized);
-    }
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    Debug.Log("충돌");
+
+    //    if (collision.collider.l(Constant.Command) || collision.collider.CompareTag(Constant.SelectCommand))
+    //        rigi.AddForce((transform.position - collision.transform.position).normalized * 500f);
+    //}
 }

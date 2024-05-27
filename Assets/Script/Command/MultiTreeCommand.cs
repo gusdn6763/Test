@@ -57,11 +57,6 @@ public class MultiTreeCommand : MonoBehaviour
 
         IsFirstAppearance = true;
 
-        if (IsRootCommand)
-            box.isTrigger = false;
-        else
-            box.isTrigger = true;
-
         TryInitializing();
     }
 
@@ -916,8 +911,6 @@ public class MultiTreeCommand : MonoBehaviour
         {
             foreach (var kvp in childData)
                 kvp.Key.anchoredPosition = kvp.Value + new Vector3(0, middlePos.y, 0);
-
-            box.center = new Vector3(box.center.x, middlePos.y, box.center.z);
         }
     }
     public void SetVisibilityChar(int index, bool isVisible)

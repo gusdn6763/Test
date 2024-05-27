@@ -1,9 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [System.Serializable]
 public class BackgroundData
@@ -17,14 +16,20 @@ public class BackgroundData
 public class BackgroundSpeechArea : Area
 {
     [SerializeField] private List<BackgroundData> backgroundDatas;
+    [SerializeField] private MultiTreeCommand dummyPrefab;
 
     private List<MultiTreeCommand> poolList = new List<MultiTreeCommand>();
     private Coroutine currentCoroutine;
 
+    [Header("대사효과 출력 시간")]
     [SerializeField] private int perSecond = 3;
+
+    [Header("최대 갯수")]
     [SerializeField] private int maxCount = 3;
+
+    [Header("확인용 - 현재갯수")]
     [SerializeField] private int currentCount = 0;
-    [SerializeField] private int deleteTime = 0;
+
     public void SpeechStart(MultiTreeCommand multiTreeCommand)
     {
         foreach (BackgroundData backgroundData in backgroundDatas)
@@ -50,15 +55,22 @@ public class BackgroundSpeechArea : Area
         {
             while (true)
             {
+                yield return new WaitUntil(() => currentCount < maxCount);
                 if (currentCount < maxCount)
                 {
-                    int index;
-                    do
+                    List<MultiTreeCommand> availableCommands = poolList.Where(cmd => !cmd.isActiveAndEnabled).ToList();
+                    if (availableCommands.Count > 0)
                     {
-                        index = Random.Range(0, poolList.Count - 1);
-                    } while (poolList[index].isActiveAndEnabled);
-
-                    SpawnCommand(poolList[index]);
+                        int index = UnityEngine.Random.Range(0, availableCommands.Count);
+                        SpawnCommand(availableCommands[index]);
+                        DisableCommandAfterDelay(availableCommands[index]);
+                    }
+                    else
+                    {
+                        MultiTreeCommand dummy = Instantiate(dummyPrefab, transform); 
+                        SpawnCommand(dummy);
+                        DestoryCommandAfterDelay(dummy);
+                    }
                 }
                 yield return new WaitForSeconds(perSecond);
             }
@@ -66,20 +78,21 @@ public class BackgroundSpeechArea : Area
     }
     public void SpawnCommand(MultiTreeCommand multiTreeCommand)
     {
-        multiTreeCommand.transform.localPosition = FindSpawnPosition(multiTreeCommand);
+        multiTreeCommand.transform.position = FindSpawnPosition(multiTreeCommand);
 
         currentCount++;
 
         multiTreeCommand.Appearance();
         multiTreeCommand.Behavior();
-
-        StartCoroutine(DisableCommandAfterDelay(multiTreeCommand));
     }
 
-    private IEnumerator DisableCommandAfterDelay(MultiTreeCommand command)
+    public void DisableCommandAfterDelay(MultiTreeCommand command)
+    {
+        StartCoroutine(DisableCommandAfterDelayCoroutine(command));
+    }
+    private IEnumerator DisableCommandAfterDelayCoroutine(MultiTreeCommand command)
     {
         yield return new WaitUntil(() => command.IsAppearanceStart == false);
-        yield return new WaitForSeconds(deleteTime);
 
         command.DisAppearance();
         yield return new WaitUntil(() => command.IsDisAppearanceStart == false);
@@ -87,6 +100,20 @@ public class BackgroundSpeechArea : Area
         currentCount--;
     }
 
+    public void DestoryCommandAfterDelay(MultiTreeCommand command)
+    {
+        StartCoroutine(DestoryCommandAfterDelayCoroutine(command));
+    }
+
+    private IEnumerator DestoryCommandAfterDelayCoroutine(MultiTreeCommand command)
+    {
+        yield return new WaitUntil(() => command.IsAppearanceStart == false);
+
+        command.DisAppearance();
+        yield return new WaitUntil(() => command.IsDisAppearanceStart == false);
+        Destroy(command.gameObject);
+        currentCount--;
+    }
 
     public IEnumerator DisableSpeech()
     {
@@ -94,13 +121,19 @@ public class BackgroundSpeechArea : Area
             StopCoroutine(currentCoroutine);
 
         foreach (MultiTreeCommand command in poolList)
+        {
             if (command.isActiveAndEnabled)
             {
                 command.StopAllCoroutines();
                 command.DisAppearance();
             }
+        }
 
         yield return new WaitUntil(() => poolList.All(cmd => cmd.IsDisAppearanceStart == false));
+
+        foreach (Transform child in transform)
+            Destroy(child.gameObject);
+
         currentCount = 0;
         poolList.Clear();
     }

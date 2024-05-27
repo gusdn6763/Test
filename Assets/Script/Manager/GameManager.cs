@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public VillageArea currentArea;
-
     public static GameManager instance;
 
     protected void Awake()

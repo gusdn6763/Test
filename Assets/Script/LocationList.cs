@@ -6,6 +6,9 @@ public class LocationList : MonoBehaviour
 {
     [SerializeField] private MoveCommand parentLocation;
 
+    //장소 고유 행동 ex) 아이템, Npc
+    [SerializeField] private List<LocationCommandList> locationCommandLists = new List<LocationCommandList>();
+
     private Graph graph;
     private int locationCount;
 
@@ -21,7 +24,7 @@ public class LocationList : MonoBehaviour
         int count = 1;
 
         foreach (MoveCommand child in parent.ChildLocations)
-            count += CountLocations(child); 
+            count += CountLocations(child);
 
         return count;
     }
@@ -30,18 +33,23 @@ public class LocationList : MonoBehaviour
     {
         foreach (MoveCommand child in parent.ChildLocations)
         {
-            graph.AddEdge(parent, child);
+            LocationCommandList parentLocationCommand = locationCommandLists.Find(x => x.moveCommand == parent);
+            LocationCommandList childLocationCommand = locationCommandLists.Find(x => x.moveCommand == child);
+
+            if (parentLocationCommand != null && childLocationCommand != null)
+                graph.AddEdge(parent, child, parentLocationCommand.status, childLocationCommand.status);
+
             PopulateGraph(child);
         }
     }
 
-    public void CaculateAllMoveCommandStatus(List<MoveCommand> moveCommands, MoveCommand command)
+    public void CaculateAllMoveCommandStatus(MoveCommand command)
     {
         List<Tuple<MoveCommand, Status>> status = CaculateAllPathsStatusFromName(command.CommandName);
 
-        for (int i = 0; i < moveCommands.Count; i++)
+        for (int i = 0; i < locationCommandLists.Count; i++)
         {
-            MoveCommand childCommand = moveCommands[i];
+            MoveCommand childCommand = locationCommandLists[i].moveCommand;
 
             if (childCommand.Found == false)
                 continue;
@@ -63,7 +71,7 @@ public class LocationList : MonoBehaviour
         List<string> list = SearchNearLocationFromName(command.CommandName);
         for (int j = 0; j < list.Count; j++)
         {
-            if (FindLocation(list[j], moveCommands))
+            if (FindLocation(list[j]))
                 listTmp.Add("경로 발견 : " + list[j]);
         }
 
@@ -105,19 +113,24 @@ public class LocationList : MonoBehaviour
         return nearLocations;
     }
 
-    public bool FindLocation(string locationName, List<MoveCommand> moveCommands)
+    public bool FindLocation(string locationName)
     {
-        foreach (MoveCommand childCommand in moveCommands)
+        foreach (LocationCommandList childCommand in locationCommandLists)
         {
-            if (childCommand.CommandName == locationName)
+            if (childCommand.moveCommand.CommandName == locationName)
             {
-                if (childCommand.Found)
+                if (childCommand.moveCommand.Found)
                     return false;
 
-                childCommand.Found = true;
+                childCommand.moveCommand.Found = true;
                 return true;
             }
         }
         return false;
+    }
+
+    public LocationCommandList GetLocationCommandList(MoveCommand moveCommand)
+    {
+        return locationCommandLists.Find(x => x.moveCommand == moveCommand);
     }
 }

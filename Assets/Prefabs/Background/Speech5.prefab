@@ -193,7 +193,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24229bcbdf10f9047a59bd94ad5800c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  commandName: "\"\uB9DB\uC788\uB294 \uC19C\uC0AC\uD0D5 1\uAC1C\uC5D0 1\uACE8\uB4DC\""
+  commandName: "\uB354\uBBF8\uB354\uBBF8\uB354\uBBF8"
   isCondition: 1
 --- !u!114 &2542817748475541479
 MonoBehaviour:
@@ -252,6 +252,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b1643f08e535094fad075a37f892345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 0
 --- !u!114 &4648638821931275543
 MonoBehaviour:
   m_ObjectHideFlags: 0

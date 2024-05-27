@@ -16,8 +16,9 @@ public static class LayerMaskExtensions
 public class Constant
 {
     //태그
-    public const string Untagged = "Untagged";
-    public const string Selecttagged = "Selecttagged";
+    public const string Command = "Command";
+    public const string SelectCommand = "SelectCommand";
+
 
     //아이템
     //public const string info = "정보보기";

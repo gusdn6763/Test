@@ -5,12 +5,18 @@ using UnityEngine;
 public class Sprite_InitCircle : Action_Command
 {
     private GameObject initCircle;
-    private bool isFirst = true;
-    public bool IsOn { get => initCircle.activeSelf; set => initCircle.SetActive(value); }
 
-    private void Start()
+    private bool isFirst = true;
+
+    protected override void Awake()
     {
+        base.Awake();
         initCircle = Instantiate(PrefabManager.instance.initCircle, transform);
+    }
+
+    public GameObject CreateInitCircle()
+    {
+        return Instantiate(PrefabManager.instance.initCircle, transform);
     }
 
     public override void MouseEvent(MouseStatus mouseStatus)
@@ -34,7 +40,7 @@ public class Sprite_InitCircle : Action_Command
             foreach (Sprite_InitCircle parentInitCircle in parentInitCircles)
             {
                 if (parentInitCircle != this)
-                    parentInitCircle.IsOn = true;
+                    parentInitCircle.enabled = true;
             }
         }
     }

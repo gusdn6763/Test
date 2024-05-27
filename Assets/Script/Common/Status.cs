@@ -1,17 +1,16 @@
 [System.Serializable]
 public class Status
 {
+    public float time;
     public float hp;
     public float fatigue;
     public float hungry;
-    public float time;
     public Status()
     {
         fatigue = 0;
         hungry = 0;
         time = 0;
     }
-
     public Status(float hp, float fatigue, float hungry, float time = 0)
     {
         this.hp = hp;
@@ -19,7 +18,6 @@ public class Status
         this.hungry = hungry;
         this.time = time;
     }
-
     public Status(Status other)
     {
         this.hp = other.hp;

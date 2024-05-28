@@ -5867,7 +5867,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   randomAnimation:
     randomAnimationPrefab: {fileID: 1291192328886828843, guid: 316ff04298f1d2949a17a8204cb353a1, type: 3}
-    frequencyPerSecond: 30
+    frequencyPerFrame: 2
     duration: 0.5
     durationReduce: 0.5
     xMax: 0.5

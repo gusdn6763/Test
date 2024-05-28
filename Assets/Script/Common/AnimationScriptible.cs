@@ -9,7 +9,7 @@ public struct AppearanceAnimationScriptible
     [Header("글자별 애니메이션 대기시간")]
     public float waitForNormalChars;
 
-    [Header("애니메이션 타입")]
+    [Header("애니메이션 조건")]
     public AnimationConditionType conditionType;
 
     public static AppearanceAnimationScriptible GetDefault()
@@ -28,7 +28,7 @@ public struct BehaviorAnimationScriptible
 {
     public string[] animationString;
 
-    [Header("애니메이션 타입")]
+    [Header("애니메이션 조건")]
     public AnimationConditionType conditionType;
 
     public bool isLoop;
@@ -51,7 +51,7 @@ public struct DisAppearanceAnimationScriptible
     [Header("글자별 애니메이션 대기시간")]
     public float waitForNormalChars;
 
-    [Header("애니메이션 타입")]
+    [Header("애니메이션 조건")]
     public AnimationConditionType conditionType;
 
     public static DisAppearanceAnimationScriptible GetDefault()

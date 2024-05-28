@@ -8,7 +8,7 @@ using UnityEngine;
 public class RandomAnimation
 {
     public RandomTextAnimation randomAnimationPrefab;
-    [Range(0, 60)] public int frequencyPerSecond;
+    [Range(1, 240)] public int frequencyPerFrame;
 
     public float duration;
     public float durationReduce;
@@ -146,7 +146,7 @@ public class AnimationManager : MonoBehaviour
             command.Show(false);
             currentAnimation = Instantiate(randomAnimation.randomAnimationPrefab, command.transform);
             currentAnimation.Init(command.CommandName, command.FontSize,
-                                  randomAnimation.frequencyPerSecond, randomAnimation.duration,
+                                  randomAnimation.frequencyPerFrame, randomAnimation.duration,
                                   randomAnimation.durationReduce, randomAnimation.xMax, 
                                   randomAnimation.yMax);
             currentAnimation.Active(true);

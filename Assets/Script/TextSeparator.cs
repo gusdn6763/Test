@@ -10,11 +10,12 @@ public class TextSeparator : MonoBehaviour
 
     public bool IsOn { get; set; }
 
-    private int frequencyPerSecond;
+    private int frequencyPerFrame;
     private float duration;
     private float durationReduce;
     private float xMax;
     private float yMax;
+    private int frameCounter = 0;
 
     private void Awake()
     {
@@ -25,7 +26,7 @@ public class TextSeparator : MonoBehaviour
     {
         text.text = dividString;
         text.fontSize = fontSize;
-        frequencyPerSecond = frequency;
+        frequencyPerFrame = frequency;
         durationReduce = durReduce;
         duration = dur;
         xMax = x;
@@ -36,9 +37,11 @@ public class TextSeparator : MonoBehaviour
     {
         if (IsOn)
         {
-            if (Time.frameCount % (60f / frequencyPerSecond) == 0)
+            frameCounter++;
+            if (frameCounter >= frequencyPerFrame)
             {
                 transform.localPosition = new Vector3(Random.Range(-xMax, xMax), Random.Range(-yMax, yMax), 0);
+                frameCounter = 0;
             }
         }
     }
@@ -55,5 +58,6 @@ public class TextSeparator : MonoBehaviour
         }
 
         Destroy(gameObject);
+        frameCounter = 0;
     }
 }

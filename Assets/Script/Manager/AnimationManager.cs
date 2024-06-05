@@ -16,13 +16,29 @@ public class RandomAnimation
     public float yMax;
 }
 
+[System.Serializable]
+public class RandomAnimation2
+{
+    public RandomTextAnimation2 randomAnimationPrefab;
+    public float speed;
+
+    public float duration;
+    public float durationReduce;
+    public float xMax;
+    public float yMax;
+}
+
+
 public class AnimationManager : MonoBehaviour
 {
     public static AnimationManager instance;
 
     [SerializeField] private RandomAnimation randomAnimation;
-
     private RandomTextAnimation currentAnimation;
+
+    [SerializeField] private RandomAnimation2 randomAnimation2;
+    private RandomTextAnimation2 currentAnimation2;
+
     private List<object> animationStack = new List<object>();
 
     public bool IsAnimation { get { return animationStack.Count > 0; } }
@@ -147,7 +163,7 @@ public class AnimationManager : MonoBehaviour
             currentAnimation = Instantiate(randomAnimation.randomAnimationPrefab, command.transform);
             currentAnimation.Init(command.CommandName, command.FontSize,
                                   randomAnimation.frequencyPerFrame, randomAnimation.duration,
-                                  randomAnimation.durationReduce, randomAnimation.xMax, 
+                                  randomAnimation.durationReduce, randomAnimation.xMax,
                                   randomAnimation.yMax);
             currentAnimation.Active(true);
         }
@@ -164,6 +180,39 @@ public class AnimationManager : MonoBehaviour
                 command.Show(true);
             }
         }
+        
+        yield return null;
+    }
+
+    public IEnumerator SeparatorCoroutine2(MultiTreeCommand command, bool isOn)
+    {
+        if (animationStack.Contains(command))
+            yield return new WaitUntil(() => animationStack.Contains(command) == false);
+
+        if (isOn)
+        {
+            command.Show(false);
+            currentAnimation2 = Instantiate(randomAnimation2.randomAnimationPrefab, command.transform);
+            currentAnimation2.Init(command.CommandName, command.FontSize,
+                                  randomAnimation2.speed, randomAnimation2.duration,
+                                  randomAnimation2.durationReduce, randomAnimation2.xMax,
+                                  randomAnimation2.yMax);
+            currentAnimation2.Active(true);
+        }
+        else
+        {
+            if (currentAnimation2)
+            {
+                animationStack.Add(currentAnimation2);
+                currentAnimation2.Active(false);
+                yield return new WaitUntil(() => currentAnimation2.IsAnimation == false);
+                animationStack.Remove(currentAnimation2);
+                Destroy(currentAnimation2.gameObject);
+                currentAnimation2 = null;
+                command.Show(true);
+            }
+        }
+
         yield return null;
     }
 

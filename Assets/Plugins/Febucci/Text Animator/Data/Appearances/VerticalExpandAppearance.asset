@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 351d9d9e5c9ea7946842aee1160f7731, type: 3}
   m_Name: VerticalExpandAppearance
   m_EditorClassIdentifier: 
+  baseDuration: 0
   tagID: vertexp
-  baseDuration: 0.5
   startsFromBottom: 1

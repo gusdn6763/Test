@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dbde6098d9bea441b3ac872e52073ba, type: 3}
   m_Name: HorizontalExpandAppearance
   m_EditorClassIdentifier: 
+  baseDuration: 0
   tagID: horiexp
-  baseDuration: 0.5
   type: 0

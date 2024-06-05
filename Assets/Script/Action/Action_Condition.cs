@@ -14,17 +14,6 @@ public class Action_Condition : Action_Command
 {
     [SerializeField] private List<CommandOnOff> commandOnOffList = new List<CommandOnOff>();
 
-    public override void MouseEvent(MouseStatus mouseStatus)
-    {
-        for (int i = 0; i < commandOnOffList.Count; i++)
-        {
-            if (commandOnOffList[i].mouseStatus == mouseStatus)
-            {
-                CommandListOnOff(true);
-            }
-        }
-    }
-
     public void CommandListOnOff(bool isOn)
     {
         for (int i = 0; i < commandOnOffList.Count; i++)

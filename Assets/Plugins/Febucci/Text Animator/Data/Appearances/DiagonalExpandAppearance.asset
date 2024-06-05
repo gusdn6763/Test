@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7303246fad8e2a049aebd6c0c71d2985, type: 3}
   m_Name: DiagonalExpandAppearance
   m_EditorClassIdentifier: 
+  baseDuration: 0
   tagID: diagexp
-  baseDuration: 0.5
   diagonalFromBttmLeft: 0

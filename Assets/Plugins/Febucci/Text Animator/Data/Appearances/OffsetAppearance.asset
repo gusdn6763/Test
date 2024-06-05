@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 146552007a93ecc42b0d63f26788e6cb, type: 3}
   m_Name: OffsetAppearance
   m_EditorClassIdentifier: 
+  baseDuration: 0
   tagID: offset
-  baseDuration: 0.5
   baseAmount: 10
   baseDirection: {x: 1, y: 1}

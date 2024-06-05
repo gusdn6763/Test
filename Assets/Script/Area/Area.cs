@@ -4,7 +4,27 @@ using UnityEngine;
 
 public class Area : MonoBehaviour
 {
+    private List<MultiTreeCommand> commands = new List<MultiTreeCommand>();
+
     public bool IsWait = false;
+
+    public virtual void AddCommand(MultiTreeCommand command)
+    {
+        if (!commands.Contains(command))
+        {
+            commands.Add(command);
+            // 필요한 처리 수행
+        }
+    }
+
+    public virtual void RemoveCommand(MultiTreeCommand command)
+    {
+        if (commands.Contains(command))
+        {
+            commands.Remove(command);
+            // 필요한 처리 수행
+        }
+    }
 
     public Vector3 FindSpawnPosition(MultiTreeCommand multiTreeCommand)
     {
@@ -19,7 +39,6 @@ public class Area : MonoBehaviour
 
         return position;
     }
-
     public Vector3 GetRandomPosition(Vector3 size)
     {
         float z = transform.position.z;
@@ -32,7 +51,6 @@ public class Area : MonoBehaviour
 
         return new Vector3(randomX, randomY, z);
     }
-
     public bool CheckOverlap(Vector3 position, Vector3 size)
     {
         Collider[] colliders = Physics.OverlapBox(position, size / 2f);

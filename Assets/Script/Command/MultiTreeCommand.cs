@@ -12,7 +12,7 @@ using System.Linq;
 
 public class MultiTreeCommand : MonoBehaviour
 {
-    private AnimationDataController animationDataController;
+    protected AnimationDataController animationDataController;
 
     public Area CurrentArea { get { return GetComponentInParent<Area>(); } }
 
@@ -20,14 +20,15 @@ public class MultiTreeCommand : MonoBehaviour
     public Action<MouseStatus> onMouseEvent;        //마우스 상호작용시
     public Action<MouseStatus> onAnimationEndEvent; //애니메이션 종료시
 
-    protected SpriteList spriteList;
-    protected MenuList menuList;
+
+    public SpriteList spriteList;
+    public MenuList menuList;
 
     protected BoxCollider box;
     protected TextMeshPro text;
     protected RectTransform rect; 
 
-    protected Vector2 padding = new Vector2(0.1f, 0f);
+    public Vector2 padding = new Vector2(0.1f, 0.2f);
 
     [Header("명칭")]
     [SerializeField] private string commandName;
@@ -66,6 +67,7 @@ public class MultiTreeCommand : MonoBehaviour
             return;
 
         spriteList.TryInitializing();
+        menuList.TryInitializing(padding);
 
         text.text = CommandName;
         initialized = true;
@@ -89,7 +91,6 @@ public class MultiTreeCommand : MonoBehaviour
         if (text.text.Equals(textWithoutTextAnimTags) == false)
         {
             ConvertText(text.text);
-            //Prepares Characters
             CopyMeshFromSource(ref characters); //초기 데이터 세팅
         }
         else
@@ -110,22 +111,6 @@ public class MultiTreeCommand : MonoBehaviour
     }
 
     #region 트리 관련
-    private MenuList listmenu;
-    public MenuList MyMenuList
-    {
-        get
-        {
-            if (listmenu == null)
-            {
-                listmenu = GetComponentInChildren<MenuList>(true);
-
-                if (listmenu == null)
-                    Debug.LogError(name + "잘못된 트리구조");
-            }
-
-            return listmenu;
-        }
-    }
 
     public bool IsRootCommand
     {
@@ -181,15 +166,13 @@ public class MultiTreeCommand : MonoBehaviour
     public void RefreshChildCommands()
     {
         childCommands = new List<MultiTreeCommand>();
-        if (MyMenuList != null)
+
+        for (int i = 0; i < menuList.transform.childCount; i++)
         {
-            for (int i = 0; i < MyMenuList.transform.childCount; i++)
-            {
-                Transform childTransform = MyMenuList.transform.GetChild(i);
-                MultiTreeCommand childCommand = childTransform.GetComponent<MultiTreeCommand>();
-                if (childCommand)
-                    childCommands.Add(childCommand);
-            }
+            Transform childTransform = menuList.transform.GetChild(i);
+            MultiTreeCommand childCommand = childTransform.GetComponent<MultiTreeCommand>();
+            if (childCommand)
+                childCommands.Add(childCommand);
         }
     }
 
@@ -341,16 +324,16 @@ public class MultiTreeCommand : MonoBehaviour
 
     #region 애니메이션
 
-    public bool IsAppearanceStart { get; private set; }           //생성시작
-    public bool IsDisAppearanceStart { get; private set; }        //사라짐시작
-    public bool IsBehaviorStart { get; private set; }             //행동애니메이션 시작
+    public bool IsAppearanceStart { get;  set; }           //생성시작
+    public bool IsDisAppearanceStart { get;  set; }        //사라짐시작
+    public bool IsBehaviorStart { get;  set; }             //행동애니메이션 시작
     public bool IsFirstAppearance { get; private set; } = true;
     public bool IsLoop { get => currentBehavior.isLoop; }
     public float FontSize { get => text.fontSize; }
 
-    private int charactersCount;
+    protected int charactersCount;
 
-    private MyCharacterData[] characters;
+    protected MyCharacterData[] characters;
 
     protected AppearanceAnimationScriptible currentAppearance;
     protected BehaviorAnimationScriptible currentBehavior;
@@ -368,23 +351,20 @@ public class MultiTreeCommand : MonoBehaviour
     private float referenceFontSize = 10;
 
     #region 애니메이션 실행 부분
-    void OnDrawGizmos()
-    {
-        if (text != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawCube(transform.position, GetSize());
-        }
-    }
-
+    private Coroutine appearanceCoroutine;
     public void Appearance()
     {
         gameObject.SetActive(true);
-        StartCoroutine(AppearanceCoroutine());
+
+        if (appearanceCoroutine != null)
+            StopCoroutine(appearanceCoroutine);
+
+        appearanceCoroutine = StartCoroutine(AppearanceCoroutine());
     }
     IEnumerator AppearanceCoroutine()
     {
         IsAppearanceStart = true;
+        box.isTrigger = true;
 
         HideAllCharactersTime();
         currentAppearance = animationDataController.GetAppearanceTags();
@@ -412,10 +392,15 @@ public class MultiTreeCommand : MonoBehaviour
             yield return null;
         }
         IsAppearanceStart = false;
+
+        if (IsRootCommand)
+            box.isTrigger = false;
     }
     private Coroutine behaviorCoroutine;
     public void Behavior()
     {
+        IsBehaviorStart = false;
+
         if (behaviorCoroutine != null)
             StopCoroutine(behaviorCoroutine);
 
@@ -450,9 +435,14 @@ public class MultiTreeCommand : MonoBehaviour
 
         IsBehaviorStart = false;
     }
+
+    private Coroutine disAppearanceCoroutine;
     public void DisAppearance()
     {
-        StartCoroutine(DisAppearanceCoroutine());
+        if (disAppearanceCoroutine != null)
+            StopCoroutine(disAppearanceCoroutine);
+
+        disAppearanceCoroutine = StartCoroutine(DisAppearanceCoroutine());
     }
     IEnumerator DisAppearanceCoroutine()
     {
@@ -481,12 +471,7 @@ public class MultiTreeCommand : MonoBehaviour
 
         IsDisAppearanceStart = false;
     }
-
-    public void Show(bool isOn)
-    {
-        text.enabled = isOn ? true : false;
-    }
-    void ConvertText(string textToParse)
+    protected void ConvertText(string textToParse)
     {
         if (textToParse is null) // prevents error along the method if text is passed as null
             textToParse = string.Empty;
@@ -550,7 +535,6 @@ public class MultiTreeCommand : MonoBehaviour
 
         PopulateCharacters(false);
     }
-
     void AnimateText(float deltaTime)
     {
         if (IsAppearanceStart || IsDisAppearanceStart || IsBehaviorStart)
@@ -598,7 +582,11 @@ public class MultiTreeCommand : MonoBehaviour
     }
     #endregion
 
-    #region 보조 함수
+    #region 보조 애니메이션
+    public void Show(bool isOn)
+    {
+        text.enabled = isOn ? true : false;
+    }
     public void PositionInitialize()
     {
         for (int i = 0; i < transform.childCount; i++)

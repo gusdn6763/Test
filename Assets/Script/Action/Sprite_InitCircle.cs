@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Sprite_InitCircle : Action_Command
 {
     private GameObject initCircle;
 
-    private bool isFirst = true;
+    public bool isFirst = true;
 
     protected override void Awake()
     {
@@ -29,6 +30,8 @@ public class Sprite_InitCircle : Action_Command
         }
     }
 
+
+
     public override void ConditionEvent(bool isOn)
     {
         if (isFirst && isOn)
@@ -36,11 +39,12 @@ public class Sprite_InitCircle : Action_Command
             isFirst = false;
             initCircle.SetActive(true);
 
-            Sprite_InitCircle[] parentInitCircles = GetComponentsInParent<Sprite_InitCircle>();
-            foreach (Sprite_InitCircle parentInitCircle in parentInitCircles)
+            if (command.ParentCommand)
             {
-                if (parentInitCircle != this)
-                    parentInitCircle.enabled = true;
+                Sprite_InitCircle parentInitCircle = command.ParentCommand.spriteList.GetComponent<Sprite_InitCircle>();
+
+                if (parentInitCircle)
+                    parentInitCircle.initCircle.SetActive(true);   
             }
         }
     }

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   appearanceAnimation:
   - animationString:
-    - scale d=0.4
+    - scale d=0.125
     waitForNormalChars: 0
     conditionType: 1
   - animationString:
-    - fade d=0.4
+    - fade d=0.125
     waitForNormalChars: 0
     conditionType: 0
   behaviorAnimation:
@@ -26,12 +26,8 @@ MonoBehaviour:
     - wave a=0.03 w=0.5 f=0.3
     conditionType: 0
     isLoop: 1
-  - animationString:
-    - revert d=0.4
-    conditionType: 2
-    isLoop: 0
   disAppearanceAnimation:
   - animationString:
-    - fade d=0.4
+    - fade d=0.125
     waitForNormalChars: 0
     conditionType: 0

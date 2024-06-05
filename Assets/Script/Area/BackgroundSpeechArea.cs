@@ -8,7 +8,7 @@ using UnityEngine;
 public class BackgroundData
 {
     public MultiTreeCommand excuteCommand;
-    public List<MultiTreeCommand> sppechList = new List<MultiTreeCommand>();
+    public List<SpeechCommand> sppechList = new List<SpeechCommand>();
 
     public bool isLoop;
 }
@@ -16,13 +16,12 @@ public class BackgroundData
 public class BackgroundSpeechArea : Area
 {
     [SerializeField] private List<BackgroundData> backgroundDatas;
-    [SerializeField] private MultiTreeCommand dummyPrefab;
+    [SerializeField] private SpeechCommand dummyPrefab;
 
-    private List<MultiTreeCommand> poolList = new List<MultiTreeCommand>();
-    private Coroutine currentCoroutine;
+    private List<SpeechCommand> poolList = new List<SpeechCommand>();
 
     [Header("대사효과 출력 시간")]
-    [SerializeField] private int perSecond = 3;
+    [SerializeField] private float perSecond = 3;
 
     [Header("최대 갯수")]
     [SerializeField] private int maxCount = 3;
@@ -36,7 +35,7 @@ public class BackgroundSpeechArea : Area
         {
             if (multiTreeCommand == backgroundData.excuteCommand)
             {
-                currentCoroutine = StartCoroutine(SpeechCoroutine(backgroundData));
+                StartCoroutine(SpeechCoroutine(backgroundData));
                 break;
             }
         }
@@ -46,7 +45,7 @@ public class BackgroundSpeechArea : Area
     {
         for (int i = 0; i < backgroundData.sppechList.Count; i++)
         {
-            MultiTreeCommand command = Instantiate(backgroundData.sppechList[i], transform);
+            SpeechCommand command = Instantiate(backgroundData.sppechList[i], transform);
             command.gameObject.SetActive(false);
             poolList.Add(command);
         }
@@ -58,7 +57,7 @@ public class BackgroundSpeechArea : Area
                 yield return new WaitUntil(() => currentCount < maxCount);
                 if (currentCount < maxCount)
                 {
-                    List<MultiTreeCommand> availableCommands = poolList.Where(cmd => !cmd.isActiveAndEnabled).ToList();
+                    List<SpeechCommand> availableCommands = poolList.Where(cmd => !cmd.isActiveAndEnabled).ToList();
                     if (availableCommands.Count > 0)
                     {
                         int index = UnityEngine.Random.Range(0, availableCommands.Count);
@@ -67,7 +66,7 @@ public class BackgroundSpeechArea : Area
                     }
                     else
                     {
-                        MultiTreeCommand dummy = Instantiate(dummyPrefab, transform); 
+                        MultiTreeCommand dummy = Instantiate(dummyPrefab, transform);
                         SpawnCommand(dummy);
                         DestoryCommandAfterDelay(dummy);
                     }
@@ -117,19 +116,15 @@ public class BackgroundSpeechArea : Area
 
     public IEnumerator DisableSpeech()
     {
-        if (currentCoroutine != null)
-            StopCoroutine(currentCoroutine);
+        StopAllCoroutines();
 
-        foreach (MultiTreeCommand command in poolList)
+        foreach (SpeechCommand command in poolList)
         {
             if (command.isActiveAndEnabled)
-            {
-                command.StopAllCoroutines();
-                command.DisAppearance();
-            }
+                command.FadeText();
         }
 
-        yield return new WaitUntil(() => poolList.All(cmd => cmd.IsDisAppearanceStart == false));
+        yield return new WaitUntil(() => poolList.All(cmd => cmd.isActiveAndEnabled == false));
 
         foreach (Transform child in transform)
             Destroy(child.gameObject);

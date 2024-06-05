@@ -47,27 +47,19 @@ public class MoveCommand : VillageCommand
 
     public override void Interaction(MouseStatus mouseStatus)
     {
-        switch(mouseStatus)
-        {
-            case MouseStatus.Enter:
-                ShowPlayerStatus(true);
-                break;
-            case MouseStatus.Exit:
-                ShowPlayerStatus(false);
-                break;
-        }
         base.Interaction(mouseStatus);
     }
-    public virtual void ShowPlayerStatus(bool isOn)
+
+    private void OnMouseEnter()
     {
-        if (isOn)
-        {
-            if(alternativeLocation)
-                Player.instance.ShowPreviewStatus(currentStatus, alternativeLocation.CommandName);
-            else
-                Player.instance.ShowPreviewStatus(currentStatus, CommandName);
-        }
+        if (alternativeLocation)
+            Player.instance.ShowPreviewStatus(alternativeLocation.currentStatus, alternativeLocation.CommandName);
         else
-            Player.instance.StopPreviewStatus();
+            Player.instance.ShowPreviewStatus(currentStatus, CommandName);
+    }
+
+    private void OnMouseExit()
+    {
+        Player.instance.StopPreviewStatus();
     }
 }

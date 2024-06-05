@@ -13,9 +13,8 @@ GameObject:
   - component: {fileID: 5125110735911822916}
   - component: {fileID: 7033101611567885343}
   - component: {fileID: 6716012950951505238}
-  - component: {fileID: 2128469094927813415}
-  - component: {fileID: 2542817748475541479}
-  - component: {fileID: 4648638821931275543}
+  - component: {fileID: 7316423712095873057}
+  - component: {fileID: -2245315354757993856}
   m_Layer: 0
   m_Name: Speech1
   m_TagString: Untagged
@@ -226,7 +225,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 120
   m_CollisionDetection: 0
---- !u!114 &2128469094927813415
+--- !u!114 &7316423712095873057
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -235,12 +234,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 28797152580033273}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24229bcbdf10f9047a59bd94ad5800c0, type: 3}
+  m_Script: {fileID: 11500000, guid: ef1c7cfd1b02ba34e9cdabb85ebbce0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   commandName: "\"\uB9DB\uC788\uB294 \uC19C\uC0AC\uD0D5 1\uAC1C\uC5D0 1\uACE8\uB4DC\""
   isCondition: 1
---- !u!114 &2542817748475541479
+  isFade: 0
+--- !u!114 &-2245315354757993856
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -249,20 +249,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 28797152580033273}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b1643f08e535094fad075a37f892345, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 0
---- !u!114 &4648638821931275543
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28797152580033273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a97fbf39199ab0f44a09ca699386437e, type: 3}
+  m_Script: {fileID: 11500000, guid: 06ce8cb6c94ea6849b5bff55c61bf209, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animationData: {fileID: 11400000, guid: cb6adba7a7b94a24cb3f0623d8d4c4db, type: 2}

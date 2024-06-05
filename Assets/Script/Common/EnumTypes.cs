@@ -15,5 +15,6 @@ public enum AnimationConditionType
     First,
     Enter,
     Clicking,
-    Up
+    Up,
+    Speech_FadeIn
 }

@@ -41,8 +41,13 @@ public class VillageArea : Area
     {
         DisAbleAllCommand();
 
-        startPosition.onMouseEvent?.Invoke(MouseStatus.Excute);
-        startPosition.onAnimationEndEvent?.Invoke(MouseStatus.Excute);
+        if (startPosition)
+        {
+            startPosition.onMouseEvent?.Invoke(MouseStatus.Excute);
+            startPosition.onAnimationEndEvent?.Invoke(MouseStatus.Excute);
+        }
+        else
+            StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(defaultCommands));
     }
 
     private void Update()
@@ -138,6 +143,13 @@ public class VillageArea : Area
         }
     }
 
+    public void ActiveOutLine(MouseStatus mouseStatus)
+    {
+        Sprite_OutLine[] outLines = GetComponentsInChildren<Sprite_OutLine>();
+
+        for (int i = 0; i < outLines.Length; i++)
+            outLines[i].MouseEvent(mouseStatus);
+    }
     //스택구조
     public void Interaction(MultiTreeCommand multiTreeCommand, MouseStatus mouseStatus)
     {
@@ -177,6 +189,9 @@ public class VillageArea : Area
             clickMousePosition = Input.mousePosition;
             multiTreeCommand.Interaction(mouseStatus);
             StartCoroutine(BlurManager.instance.BlurCoroutine(false));
+
+            if (multiTreeCommand.IsRootCommand)
+                ActiveOutLine(mouseStatus);
         }
         else if (mouseStatus == MouseStatus.Drag)
         {
@@ -189,6 +204,9 @@ public class VillageArea : Area
 
             if (clickMousePosition == Input.mousePosition)
                 Interaction(multiTreeCommand, MouseStatus.Excute);
+
+            if (multiTreeCommand.IsRootCommand)
+                ActiveOutLine(mouseStatus);
         }
         else if (mouseStatus == MouseStatus.Excute)
         {
@@ -233,6 +251,9 @@ public class VillageArea : Area
         if (command.alternativeLocation)
         {
             yield return MoveLocationCoroutine(command.alternativeLocation);
+            locationList.CaculateAllMoveCommandStatus(command);
+            IsWait = false;
+            yield break;
         }
         else
         {
@@ -266,6 +287,11 @@ public class VillageArea : Area
 
         //장소 이동
         Player.instance.CurrentLocation = command.CommandName;
+
+        //행동 활성화
+        Action_Condition tt = command.GetComponent<Action_Condition>();
+        if (tt)
+            tt.CommandListOnOff(true);
 
         //기타 오브젝트 활성화
         {

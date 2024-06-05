@@ -2,12 +2,11 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditorInternal.ReorderableList;
 
 [RequireComponent(typeof(Rigidbody))]
-public class RootVillageAnimationHandler : AnimationHandler
+public class RootVillageAnimationHandler2 : AnimationHandler
 {
-    [Range(0, 50)] [SerializeField] private float speed;
+    [Range(0, 50)][SerializeField] private float speed;
     [SerializeField] private bool type;
 
     private Vector3 vec;
@@ -34,13 +33,13 @@ public class RootVillageAnimationHandler : AnimationHandler
             case MouseStatus.Down:
                 vec = MousePosition() - transform.position;
                 yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
-                yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, true));
+                yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine2(command, true));
                 break;
             case MouseStatus.Up:
                 rigi.mass = defaultMass;
                 rigi.drag = drfaultDrag;
                 rigi.velocity = Vector3.zero;
-                yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, false));
+                yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine2(command, false));
                 break;
             case MouseStatus.Drag:
                 rigi.mass = 1;

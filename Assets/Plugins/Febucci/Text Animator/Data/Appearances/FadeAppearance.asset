@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d26528e73e36f64dab95b69625232a7, type: 3}
   m_Name: FadeAppearance
   m_EditorClassIdentifier: 
+  baseDuration: 0
   tagID: fade
-  baseDuration: 0.5

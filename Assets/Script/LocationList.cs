@@ -66,9 +66,13 @@ public class LocationList : MonoBehaviour
                 }
             }
         }
+        SearchNearLocation(command);
+    }
 
+    public void SearchNearLocation(MoveCommand command)
+    {
         List<string> listTmp = new List<string>();
-        List<string> list = SearchNearLocationFromName(command.CommandName);
+        List<string> list = FindNearLocationFromName(command.CommandName);
         for (int j = 0; j < list.Count; j++)
         {
             if (FindLocation(list[j]))
@@ -77,6 +81,19 @@ public class LocationList : MonoBehaviour
 
         if (listTmp.Count > 0)
             Player.instance.ShowIntroduce(listTmp);
+    }
+
+    public List<string> FindNearLocationFromName(string fromLocation)
+    {
+        int currentVertex = graph.GetVertexFromName(fromLocation);
+        List<string> nearLocations = new List<string>();
+
+        foreach (var edge in graph.list[currentVertex])
+        {
+            nearLocations.Add(graph.locations[edge.Item1].CommandName);
+        }
+
+        return nearLocations;
     }
 
     public List<Tuple<MoveCommand, Status>> CaculateAllPathsStatusFromName(string fromLocation)
@@ -98,19 +115,6 @@ public class LocationList : MonoBehaviour
         }
 
         return result;
-    }
-
-    public List<string> SearchNearLocationFromName(string fromLocation)
-    {
-        int currentVertex = graph.GetVertexFromName(fromLocation);
-        List<string> nearLocations = new List<string>();
-
-        foreach (var edge in graph.list[currentVertex])
-        {
-            nearLocations.Add(graph.locations[edge.Item1].CommandName);
-        }
-
-        return nearLocations;
     }
 
     public bool FindLocation(string locationName)

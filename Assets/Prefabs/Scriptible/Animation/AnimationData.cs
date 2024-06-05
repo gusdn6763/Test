@@ -12,4 +12,26 @@ public class AnimationData : ScriptableObject
 
     [Header("사라짐 애니메이션")]
     [SerializeField] public List<DisAppearanceAnimationScriptible> disAppearanceAnimation;
+
+    public AppearanceAnimationScriptible FindAppearanceType(AnimationConditionType animationConditionType)
+    {
+        for(int i = 0; i < appearanceAnimation.Count; i++)
+        {
+            if (animationConditionType == appearanceAnimation[i].conditionType)
+                return appearanceAnimation[i];
+        }
+
+        return AppearanceAnimationScriptible.GetDefault();
+    }
+
+    public DisAppearanceAnimationScriptible FindDisAppearanceType(AnimationConditionType animationConditionType)
+    {
+        for (int i = 0; i < disAppearanceAnimation.Count; i++)
+        {
+            if (animationConditionType == disAppearanceAnimation[i].conditionType)
+                return disAppearanceAnimation[i];
+        }
+
+        return DisAppearanceAnimationScriptible.GetDefault();
+    }
 }

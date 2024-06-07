@@ -21,10 +21,11 @@ public class MultiTreeCommand : MonoBehaviour
     public Action<MouseStatus> onAnimationEndEvent; //애니메이션 종료시
 
 
-    public SpriteList spriteList;
-    public MenuList menuList;
+    [HideInInspector] public SpriteList spriteList;
+    [HideInInspector] public MenuList menuList;
 
-    protected BoxCollider box;
+    [SerializeField] protected BoxCollider interactionBox;
+    [SerializeField] BoxCollider collisionBox;
     protected TextMeshPro text;
     protected RectTransform rect; 
 
@@ -54,7 +55,7 @@ public class MultiTreeCommand : MonoBehaviour
 
         text = GetComponent<TextMeshPro>();
         rect = GetComponent<RectTransform>();
-        box = GetComponent<BoxCollider>();
+        interactionBox = GetComponent<BoxCollider>();
 
         IsFirstAppearance = true;
 
@@ -67,7 +68,6 @@ public class MultiTreeCommand : MonoBehaviour
             return;
 
         spriteList.TryInitializing();
-        menuList.TryInitializing(padding);
 
         text.text = CommandName;
         initialized = true;
@@ -299,12 +299,12 @@ public class MultiTreeCommand : MonoBehaviour
     #region 사이즈 조절
     public Vector3 GetSize()
     {
-        return new Vector3(text.preferredWidth + padding.x, text.preferredHeight + padding.y, 1);
+        return new Vector3(text.preferredWidth, text.preferredHeight, 1);
     }
     private void SetSize(Vector3 size)
     {
         rect.sizeDelta = size;
-        box.size = size;
+        interactionBox.size = size;
 
         spriteList.SetSize(size);
     }
@@ -364,7 +364,7 @@ public class MultiTreeCommand : MonoBehaviour
     IEnumerator AppearanceCoroutine()
     {
         IsAppearanceStart = true;
-        box.isTrigger = true;
+        interactionBox.isTrigger = true;
 
         HideAllCharactersTime();
         currentAppearance = animationDataController.GetAppearanceTags();
@@ -394,7 +394,7 @@ public class MultiTreeCommand : MonoBehaviour
         IsAppearanceStart = false;
 
         if (IsRootCommand)
-            box.isTrigger = false;
+            interactionBox.isTrigger = false;
     }
     private Coroutine behaviorCoroutine;
     public void Behavior()

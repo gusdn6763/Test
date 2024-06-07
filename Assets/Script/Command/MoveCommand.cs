@@ -22,6 +22,8 @@ public class MoveCommand : VillageCommand
     [Header("대체 지역")]
     public MoveCommand alternativeLocation;
 
+    public string command2;
+
     public override bool IsCondition
     {
         get { return base.IsCondition && Found; }
@@ -48,6 +50,14 @@ public class MoveCommand : VillageCommand
     public override void Interaction(MouseStatus mouseStatus)
     {
         base.Interaction(mouseStatus);
+
+        if (mouseStatus == MouseStatus.Excute)
+        {
+            if (alternativeLocation)
+                Player.instance.SetStatus(alternativeLocation.MyStatus);
+            else
+                Player.instance.SetStatus(MyStatus);
+        }
     }
 
     private void OnMouseEnter()

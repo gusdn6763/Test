@@ -18,19 +18,19 @@ public class Stat : MonoBehaviour
         get { return previewValue; }
         set
         {
-            if (previewValue + value > fullValue)
+            if (CurrentValue + value >= fullValue)
                 previewValue = fullValue;
             else
-                previewValue = currentValue + value;
+                previewValue = CurrentValue + value;
 
-            if (value > 0)              //증가
+            if (previewValue > CurrentValue)              //증가
                 arrowImage.localScale = new Vector3(-1, 1, 1);
-            else if (value < 0)          //감소
+            else if (previewValue < CurrentValue)          //감소
                 arrowImage.localScale = new Vector3(1, 1, 1);
             else
                 arrowImage.localScale = Vector3.zero;
 
-            float fillValue = previewValue / currentValue;
+            float fillValue = previewValue / fullValue;
             previewImage.fillAmount = fillValue;
         }
     }
@@ -41,10 +41,12 @@ public class Stat : MonoBehaviour
         set
         {
             currentValue = value;
+            //previewValue = value;
 
             arrowImage.localScale = Vector3.zero;
 
             currentImage.fillAmount = currentValue / fullValue;
+            previewImage.fillAmount = currentImage.fillAmount;
         }
     }
 
@@ -57,7 +59,7 @@ public class Stat : MonoBehaviour
 
     public void Initialize(float maxValue)
     {
-        fullValue = previewValue = currentValue = maxValue;
+        CurrentValue = fullValue = maxValue;
         arrowImage.localScale = new Vector3(0,0,0);
     }
 }

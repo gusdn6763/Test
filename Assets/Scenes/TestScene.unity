@@ -1073,7 +1073,7 @@ MonoBehaviour:
     yMax: 0.5
   randomAnimation2:
     randomAnimationPrefab: {fileID: -5687851486783898894, guid: 0c579bb8ef57e5b4fb8e1244626c909f, type: 3}
-    speed: 0.01
+    speed: 0.0625
     duration: 0.5
     durationReduce: 0.5
     xMax: 0.5
@@ -4127,9 +4127,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerUi: {fileID: 5453110275522949781}
-  hp: 100
-  fatigue: 100
-  hungry: 100
+  playerStatus:
+    time: 0
+    hp: 0
+    fatigue: 0
+    hungry: 0
   money: 0
   currentLocation: 
 --- !u!1 &6772523917829125438
@@ -4433,7 +4435,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waitTime: 0.01
-  value: 0.01
+  value: 0.1
 --- !u!4 &7708045945126771921
 Transform:
   m_ObjectHideFlags: 0

@@ -52,8 +52,8 @@ public class VillageArea : Area
 
     private void Update()
     {
-        if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsWait)
-            return;
+        //if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsWait)
+        //    return;
 
         CommandActiving();
     }
@@ -251,7 +251,6 @@ public class VillageArea : Area
         if (command.alternativeLocation)
         {
             yield return MoveLocationCoroutine(command.alternativeLocation);
-            locationList.CaculateAllMoveCommandStatus(command);
             IsWait = false;
             yield break;
         }

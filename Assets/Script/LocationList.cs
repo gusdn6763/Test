@@ -50,15 +50,10 @@ public class LocationList : MonoBehaviour
         for (int i = 0; i < locationCommandLists.Count; i++)
         {
             MoveCommand childCommand = locationCommandLists[i].moveCommand;
-
-            if (childCommand.Found == false)
-                continue;
-
-            foreach (var tuple in status)
+            for (int j = 0; j < status.Count; j++)
             {
-                MoveCommand location = tuple.Item1;
-                Status locationStatus = tuple.Item2;
-
+                MoveCommand location = status[j].Item1;
+                Status locationStatus = status[j].Item2;
                 if (childCommand.CommandName == location.CommandName)
                 {
                     childCommand.MyStatus = locationStatus;
@@ -90,7 +85,7 @@ public class LocationList : MonoBehaviour
 
         foreach (var edge in graph.list[currentVertex])
         {
-            nearLocations.Add(graph.locations[edge.Item1].CommandName);
+            nearLocations.Add(graph.locations[edge.Item1].command2);
         }
 
         return nearLocations;
@@ -121,7 +116,7 @@ public class LocationList : MonoBehaviour
     {
         foreach (LocationCommandList childCommand in locationCommandLists)
         {
-            if (childCommand.moveCommand.CommandName == locationName)
+            if (childCommand.moveCommand.command2 == locationName)
             {
                 if (childCommand.moveCommand.Found)
                     return false;

@@ -68,9 +68,9 @@ public class PlayerUi : UIScript
 
     public void ShowStatus(Status status)
     {
-        hpStat.PreviewValue += status.hp;
-        hungryStat.PreviewValue += status.hungry;
-        fatigueStat.PreviewValue += status.fatigue;
+        hpStat.CurrentValue = status.hp;
+        hungryStat.CurrentValue = status.hungry;
+        fatigueStat.CurrentValue = status.fatigue;
     }
 
     public void CreateMessage(string message)

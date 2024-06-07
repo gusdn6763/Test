@@ -10,15 +10,10 @@ public class Player : MonoBehaviour
     [SerializeField] private PlayerUi playerUi;
 
     [Header("플레이어")]
-    [SerializeField] private float hp;
-    [SerializeField] private float fatigue;
-    [SerializeField] private float hungry;
+    [SerializeField] private Status playerStatus;
     [SerializeField] private int money;
     [SerializeField] private string currentLocation;
 
-    public float Hp { get { return hp; }  set  { hp = value; } }
-    public float Hungry { get { return hungry; } set { hungry = value; } }
-    public float Fatigue { get { return fatigue; } set { fatigue = value; } }
     public int Money { get { return money; } set { money = value; } }
     public string CurrentLocation{ get { return currentLocation; } set { currentLocation = value; playerUi.MoveLocation(currentLocation); } }
 
@@ -34,7 +29,7 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        playerUi.InitSetting(new Status(Hp, Hungry, Fatigue));
+        playerUi.InitSetting(playerStatus);
     }
 
     //UI 및 상태바 부분
@@ -48,11 +43,9 @@ public class Player : MonoBehaviour
     }
     public void SetStatus(Status status, bool isDungeon = false)
     {
-        Hp += status.hp;
-        Fatigue += status.fatigue;
-        Hungry += status.hungry;
+        playerStatus += status;
 
-        playerUi.ShowStatus(new Status(Hp, Fatigue, Hungry, status.time));
+        playerUi.ShowStatus(playerStatus);
     }
 
     public void ShowIntroduce(string introduce)

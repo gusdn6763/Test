@@ -7,7 +7,7 @@ using static UnityEditorInternal.ReorderableList;
 [RequireComponent(typeof(Rigidbody))]
 public class RootVillageAnimationHandler : AnimationHandler
 {
-    [Range(0, 50)] [SerializeField] private float speed;
+    [SerializeField] private float speed;
     [SerializeField] private bool type;
 
     private Vector3 vec;

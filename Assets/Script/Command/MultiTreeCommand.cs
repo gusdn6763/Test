@@ -9,10 +9,13 @@ using TMPro;
 using UnityEngine;
 using Febucci.UI.Actions;
 using System.Linq;
+using System.Drawing;
+using UnityEditor.ShaderKeywordFilter;
 
 public class MultiTreeCommand : MonoBehaviour
 {
     protected AnimationDataController animationDataController;
+    protected AnimationHandler animationHandler;
 
     public Area CurrentArea { get { return GetComponentInParent<Area>(); } }
 
@@ -24,8 +27,8 @@ public class MultiTreeCommand : MonoBehaviour
     [HideInInspector] public SpriteList spriteList;
     [HideInInspector] public MenuList menuList;
 
-    [SerializeField] protected BoxCollider interactionBox;
-    [SerializeField] BoxCollider collisionBox;
+    public Interaction interaction;
+    protected BoxCollider collisionBox;
     protected TextMeshPro text;
     protected RectTransform rect; 
 
@@ -49,25 +52,31 @@ public class MultiTreeCommand : MonoBehaviour
 
     protected virtual void Awake()
     {
+        animationHandler = GetComponent<AnimationHandler>();
         animationDataController = GetComponent<AnimationDataController>();
-        spriteList = GetComponentInChildren<SpriteList>(true);
+        interaction = GetComponentInChildren<Interaction>(true);
         menuList = GetComponentInChildren<MenuList>(true);
 
         text = GetComponent<TextMeshPro>();
         rect = GetComponent<RectTransform>();
-        interactionBox = GetComponent<BoxCollider>();
+        collisionBox = GetComponent<BoxCollider>();
 
         IsFirstAppearance = true;
 
         TryInitializing();
+        SetSize(GetSize(true));
+    }
+
+    private void Start()
+    {
+        if (interaction)        
+            interaction.SetSize(GetSize(false));
     }
 
     void TryInitializing()
     {
         if (initialized) 
             return;
-
-        spriteList.TryInitializing();
 
         text.text = CommandName;
         initialized = true;
@@ -82,7 +91,6 @@ public class MultiTreeCommand : MonoBehaviour
         TextAnimatorSettings.Instance.appearances.defaultDatabase.ForceBuildRefresh();
         TextAnimatorSettings.Instance.actions.defaultDatabase.ForceBuildRefresh();
 
-        PositionInitialize();
         HideAllCharactersTime();
     }
 
@@ -95,11 +103,6 @@ public class MultiTreeCommand : MonoBehaviour
         }
         else
             AnimateText(Time.deltaTime);
-    }
-
-    private void OnEnable()
-    {
-        SetSize(GetSize());
     }
 
     protected virtual void OnDisable()
@@ -167,12 +170,15 @@ public class MultiTreeCommand : MonoBehaviour
     {
         childCommands = new List<MultiTreeCommand>();
 
-        for (int i = 0; i < menuList.transform.childCount; i++)
+        if (menuList)
         {
-            Transform childTransform = menuList.transform.GetChild(i);
-            MultiTreeCommand childCommand = childTransform.GetComponent<MultiTreeCommand>();
-            if (childCommand)
-                childCommands.Add(childCommand);
+            for (int i = 0; i < menuList.transform.childCount; i++)
+            {
+                Transform childTransform = menuList.transform.GetChild(i);
+                MultiTreeCommand childCommand = childTransform.GetComponent<MultiTreeCommand>();
+                if (childCommand)
+                    childCommands.Add(childCommand);
+            }
         }
     }
 
@@ -297,16 +303,19 @@ public class MultiTreeCommand : MonoBehaviour
             ChangeLayerRecursively(child, layerMask);
     }
     #region 사이즈 조절
-    public Vector3 GetSize()
+    public Vector3 GetSize(bool isPadding = false)
     {
-        return new Vector3(text.preferredWidth, text.preferredHeight, 1);
+        if (isPadding)
+            return new Vector3(text.preferredWidth + padding.x, text.preferredHeight + padding.y, 1);
+        else
+            return new Vector3(text.preferredWidth, text.preferredHeight, 1);
     }
     private void SetSize(Vector3 size)
     {
         rect.sizeDelta = size;
-        interactionBox.size = size;
 
-        spriteList.SetSize(size);
+        if (collisionBox)
+            collisionBox.size = size;
     }
 
     #endregion
@@ -318,6 +327,7 @@ public class MultiTreeCommand : MonoBehaviour
     {
         CurrentMouseStatus = mouseStatus;
         onMouseEvent?.Invoke(CurrentMouseStatus);
+        animationHandler.Animaion(this, CurrentMouseStatus);
     }
 
     #endregion
@@ -343,8 +353,6 @@ public class MultiTreeCommand : MonoBehaviour
     AnimationRegion[] appearances;
     AnimationRegion[] disappearances;
 
-    private Dictionary<RectTransform, Vector3> childData = new Dictionary<RectTransform, Vector3>();
-
     private string textWithoutTextAnimTags = string.Empty;
     private bool initialized;                           //초기 데이터 설정
     private bool useDynamicScaling = true;              //폰트 크기에 따른 애니메이션 동적변경
@@ -364,7 +372,8 @@ public class MultiTreeCommand : MonoBehaviour
     IEnumerator AppearanceCoroutine()
     {
         IsAppearanceStart = true;
-        interactionBox.isTrigger = true;
+        if(collisionBox)
+            collisionBox.isTrigger = true;
 
         HideAllCharactersTime();
         currentAppearance = animationDataController.GetAppearanceTags();
@@ -393,8 +402,8 @@ public class MultiTreeCommand : MonoBehaviour
         }
         IsAppearanceStart = false;
 
-        if (IsRootCommand)
-            interactionBox.isTrigger = false;
+        if (IsRootCommand && collisionBox)
+            collisionBox.isTrigger = false;
     }
     private Coroutine behaviorCoroutine;
     public void Behavior()
@@ -587,15 +596,7 @@ public class MultiTreeCommand : MonoBehaviour
     {
         text.enabled = isOn ? true : false;
     }
-    public void PositionInitialize()
-    {
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            RectTransform child = transform.GetChild(i).GetComponent<RectTransform>();
-            if (child != null)
-                childData[child] = child.anchoredPosition;
-        }
-    }
+
     void UpdateUniformIntensity()
     {
         if (useDynamicScaling)
@@ -897,8 +898,8 @@ public class MultiTreeCommand : MonoBehaviour
 
         if (count != 0)
         {
-            foreach (var kvp in childData)
-                kvp.Key.anchoredPosition = kvp.Value + new Vector3(0, middlePos.y, 0);
+            if(interaction)
+                interaction.transform.localPosition = new Vector3(0, middlePos.y, 0);
         }
     }
     public void SetVisibilityChar(int index, bool isVisible)

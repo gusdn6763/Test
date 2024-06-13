@@ -21,6 +21,14 @@ public class RootVillageAnimationHandler2 : AnimationHandler
         drfaultDrag = rigi.drag;
     }
 
+    public override void Animaion(MultiTreeCommand command, MouseStatus mouseStatus)
+    {
+        if (mouseStatus != MouseStatus.DownWait)
+            StartCoroutine(AnimaionCoroutine(command, mouseStatus));
+        else
+            vec = MousePosition() - transform.position;
+    }
+
     public override IEnumerator AnimaionCoroutine(MultiTreeCommand command, MouseStatus mouseStatus)
     {
         switch (mouseStatus)

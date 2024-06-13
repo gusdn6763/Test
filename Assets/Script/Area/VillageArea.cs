@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class VillageArea : Area
@@ -19,10 +18,10 @@ public class VillageArea : Area
     private LocationList locationList;
 
     #region 이동 및 상호작용 관련
-    private MultiTreeCommand currentCommand;
-    private MouseStatus currentMouseStatus;
+    public MultiTreeCommand currentCommand;
+    public MouseStatus currentMouseStatus;
 
-    private MultiTreeCommand clickCommand;
+    public MultiTreeCommand clickCommand;
     private Vector3 clickMousePosition;
     #endregion
 
@@ -52,9 +51,13 @@ public class VillageArea : Area
 
     private void Update()
     {
-        //if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsWait)
-        //    return;
-
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (currentMouseStatus == MouseStatus.Enter && currentCommand)
+                Interaction(currentCommand, MouseStatus.DownWait);
+        }
+        if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsWait)
+            return;
         CommandActiving();
     }
 
@@ -77,6 +80,23 @@ public class VillageArea : Area
             }
         }
     }
+
+    public MultiTreeCommand FindCommand(Vector3 mousePosition)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Infinity, currentLayerMask);
+
+        foreach (RaycastHit hit in hits)
+        {
+            Interaction interaction = hit.collider.GetComponent<Interaction>();
+            if (interaction)
+            {
+                return interaction.command;
+            }
+        }
+        return null;
+    }
+
     public void CommandActiving()
     {
         if (selectCommandStack.Count > 0)
@@ -95,42 +115,52 @@ public class VillageArea : Area
             }
             else
                 Interaction(currentCommand, MouseStatus.Up);
+
+            return;
         }
         else
         {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, currentLayerMask))
+            MultiTreeCommand command = FindCommand(mousePosition);
+
+            if (command)
             {
-                MultiTreeCommand command = hit.collider.GetComponent<MultiTreeCommand>();
-                if (command)
+                //이전 행동과 다를경우
+                if (command != currentCommand)
                 {
-                    //이전 행동과 다를경우
-                    if (command != currentCommand)
-                    {
-                        Interaction(command, MouseStatus.Enter);    //일단 Enter를 먼저 들어가야 스택이 쌓인다.
+                    Interaction(command, MouseStatus.Enter);    //일단 Enter를 먼저 들어가야 스택이 쌓인다.
 
-                        if (currentCommand) //이전 행동과 다르고 값이 있으면
-                            Interaction(currentCommand, MouseStatus.Exit);
+                    if (currentCommand) //이전 행동과 다르고 값이 있으면
+                        Interaction(currentCommand, MouseStatus.Exit);
 
-                        currentCommand = command;
-                    }
-                    else
-                    {
-                        if (Input.GetMouseButtonUp(0))
-                            Interaction(currentCommand, MouseStatus.Up);
-                        else if (Input.GetMouseButton(0) && clickCommand == null)
-                            Interaction(currentCommand, MouseStatus.Down);
-                        else if (Input.GetMouseButton(0))
-                            Interaction(currentCommand, MouseStatus.Drag);
-                    }
+                    currentCommand = command;
+                }
+                else
+                {
+                    if (Input.GetMouseButtonUp(0))
+                        Interaction(currentCommand, MouseStatus.Up);
+                    else if (currentMouseStatus == MouseStatus.DownWait)
+                        Interaction(currentCommand, MouseStatus.Down);
+                    else if (Input.GetMouseButton(0))
+                        Interaction(currentCommand, MouseStatus.Drag);
                 }
             }
             else if (currentCommand)
             {
-                // 마우스가 어떤 오브젝트와도 충돌하지 않았을 때
-                StackExit();
-                currentCommand = null;
+                if (currentMouseStatus != MouseStatus.DownWait)
+                {
+                    // 마우스가 어떤 오브젝트와도 충돌하지 않았을 때
+                    StackExit();
+                    currentCommand = null;
+                }
+                else
+                {
+                    if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsWait)
+                    {
+
+                    }
+                    else
+                        Interaction(currentCommand, MouseStatus.Down);
+                }
             }
         }
     }
@@ -183,10 +213,14 @@ public class VillageArea : Area
             }
             multiTreeCommand.Interaction(mouseStatus);
         }
+        else if (mouseStatus == MouseStatus.DownWait)
+        {
+            clickMousePosition = Input.mousePosition;
+            multiTreeCommand.Interaction(mouseStatus);
+        }
         else if (mouseStatus == MouseStatus.Down)
         {
             clickCommand = multiTreeCommand;
-            clickMousePosition = Input.mousePosition;
             multiTreeCommand.Interaction(mouseStatus);
             StartCoroutine(BlurManager.instance.BlurCoroutine(false));
 
@@ -311,7 +345,7 @@ public class VillageArea : Area
             yield return StartCoroutine(AnimationManager.instance.VillageSettingCoroutine(commands));
         }
         //장소 백그라운드 대사효과 활성화
-         backgroundSpeechArea.SpeechStart(command);
+        backgroundSpeechArea.SpeechStart(command);
 
         currentMoveCommand = command;
         IsWait = false;

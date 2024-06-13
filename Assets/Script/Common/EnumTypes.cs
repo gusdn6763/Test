@@ -2,6 +2,7 @@ public enum MouseStatus
 {
     None,
     Enter,
+    DownWait,
     Down,
     Drag,
     Up,

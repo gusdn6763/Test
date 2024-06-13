@@ -2,6 +2,12 @@ using System.Collections;
 
 public class VillageAnimationHandler : AnimationHandler
 {
+    public override void Animaion(MultiTreeCommand command, MouseStatus mouseStatus)
+    {
+        if (mouseStatus != MouseStatus.DownWait)
+            StartCoroutine(AnimaionCoroutine(command, mouseStatus));
+    }
+
     public override IEnumerator AnimaionCoroutine(MultiTreeCommand command, MouseStatus mouseStatus)
     {
         switch (mouseStatus)

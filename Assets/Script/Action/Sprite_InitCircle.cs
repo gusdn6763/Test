@@ -41,7 +41,7 @@ public class Sprite_InitCircle : Action_Command
 
             if (command.ParentCommand)
             {
-                Sprite_InitCircle parentInitCircle = command.ParentCommand.spriteList.GetComponent<Sprite_InitCircle>();
+                Sprite_InitCircle parentInitCircle = command.ParentCommand.interaction.GetComponent<Sprite_InitCircle>();
 
                 if (parentInitCircle)
                     parentInitCircle.initCircle.SetActive(true);   

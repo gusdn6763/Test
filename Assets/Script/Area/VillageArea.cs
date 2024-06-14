@@ -3,7 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VillageArea : Area
+public interface IMoveableArea
+{
+    public void MoveLocation(MoveCommand command);
+    public IEnumerator MoveLocationCoroutine(MoveCommand command);
+}
+
+public class VillageArea : Area, IMoveableArea
 {
     //기본 최상위 행동
     [SerializeField] private List<MultiTreeCommand> defaultCommands = new List<MultiTreeCommand>();
@@ -14,6 +20,7 @@ public class VillageArea : Area
     [SerializeField] private MoveCommand startPosition;
 
     private Stack<MultiTreeCommand> selectCommandStack = new Stack<MultiTreeCommand>();
+    public int stackCount = 0;
     private MoveCommand currentMoveCommand;
     private LocationList locationList;
 
@@ -22,7 +29,7 @@ public class VillageArea : Area
     public MouseStatus currentMouseStatus;
 
     public MultiTreeCommand clickCommand;
-    private Vector3 clickMousePosition;
+    public Vector3 clickMousePosition;
     #endregion
 
     #region 레이어
@@ -51,14 +58,18 @@ public class VillageArea : Area
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (start)
         {
-            if (currentMouseStatus == MouseStatus.Enter && currentCommand)
-                Interaction(currentCommand, MouseStatus.DownWait);
+            stackCount = selectCommandStack.Count;
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (currentCommand)
+                    Interaction(currentCommand, MouseStatus.DownWait);
+            }
+            if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsWait)
+                return;
+            CommandActiving();
         }
-        if (AnimationManager.instance.IsAnimation || BlurManager.instance.BlurStart || IsWait)
-            return;
-        CommandActiving();
     }
 
     public void DisAbleAllCommand()
@@ -68,16 +79,6 @@ public class VillageArea : Area
         foreach (MultiTreeCommand command in commands)
         {
             command.gameObject.SetActive(false);
-            if (command is MoveCommand)
-            {
-                MoveCommand moveCommand = command as MoveCommand;
-
-                moveCommand.onAnimationEndEvent += (status) =>
-                {
-                    if (status == MouseStatus.Excute)
-                        StartCoroutine(MoveLocationCoroutine(moveCommand));
-                };
-            }
         }
     }
 
@@ -115,8 +116,6 @@ public class VillageArea : Area
             }
             else
                 Interaction(currentCommand, MouseStatus.Up);
-
-            return;
         }
         else
         {
@@ -162,6 +161,11 @@ public class VillageArea : Area
                         Interaction(currentCommand, MouseStatus.Down);
                 }
             }
+            else
+            {
+                StackExit();
+            }
+
         }
     }
     public void StackExit()
@@ -215,11 +219,11 @@ public class VillageArea : Area
         }
         else if (mouseStatus == MouseStatus.DownWait)
         {
-            clickMousePosition = Input.mousePosition;
             multiTreeCommand.Interaction(mouseStatus);
         }
         else if (mouseStatus == MouseStatus.Down)
         {
+            clickMousePosition = Input.mousePosition;
             clickCommand = multiTreeCommand;
             multiTreeCommand.Interaction(mouseStatus);
             StartCoroutine(BlurManager.instance.BlurCoroutine(false));
@@ -234,9 +238,12 @@ public class VillageArea : Area
         else if (mouseStatus == MouseStatus.Up)
         {
             clickCommand = null;
+            currentCommand = null;
             multiTreeCommand.Interaction(mouseStatus);
 
-            if (clickMousePosition == Input.mousePosition)
+            if (Mathf.FloorToInt(clickMousePosition.x) == Mathf.FloorToInt(Input.mousePosition.x) &&
+                Mathf.FloorToInt(clickMousePosition.y) == Mathf.FloorToInt(Input.mousePosition.y) &&
+                Mathf.FloorToInt(clickMousePosition.z) == Mathf.FloorToInt(Input.mousePosition.z))
                 Interaction(multiTreeCommand, MouseStatus.Excute);
 
             if (multiTreeCommand.IsRootCommand)
@@ -273,6 +280,11 @@ public class VillageArea : Area
     {
         yield return StartCoroutine(BlurManager.instance.BlurCoroutine(false));
         multiTreeCommand.ChangeLayer(defaultLayerMask);
+    }
+
+    public void MoveLocation(MoveCommand command)
+    {
+        StartCoroutine(MoveLocationCoroutine(command));
     }
 
     public IEnumerator MoveLocationCoroutine(MoveCommand command)

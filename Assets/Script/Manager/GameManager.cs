@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public BoxCollider bag;
+
     protected void Awake()
     {
         if (instance == null)

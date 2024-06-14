@@ -37,17 +37,19 @@ public class RootVillageAnimationHandler : AnimationHandler
             case MouseStatus.Enter:
                 //yield return StartCoroutine(AnimationManager.instance.IsBehaviorAnimationCoroutine(command));
                 command.IsBehaviorStart = false;
-                yield return StartCoroutine(AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands));
+                if (command.ChildCommands.Count > 0)
+                    yield return AnimationManager.instance.InitialAnimationCoroutine(command.ChildCommands);
                 break;
             case MouseStatus.Down:
-                yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
-                yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, true));
+                if (command.ChildCommands.Count > 0)
+                    yield return AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false);
+                    StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, true));
                 break;
             case MouseStatus.Up:
                 rigi.mass = defaultMass;
                 rigi.drag = drfaultDrag;
                 rigi.velocity = Vector3.zero;
-                yield return StartCoroutine(AnimationManager.instance.SeparatorCoroutine(command, false));
+                yield return AnimationManager.instance.SeparatorCoroutine(command, false);
                 break;
             case MouseStatus.Drag:
                 rigi.mass = 1;
@@ -79,7 +81,8 @@ public class RootVillageAnimationHandler : AnimationHandler
                 command.IsBehaviorStart = true;
                 break;
             case MouseStatus.Exit:
-                yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
+                if (command.ChildCommands.Count > 0)
+                    yield return StartCoroutine(AnimationManager.instance.AnimationCoroutine(command.ChildCommands, false));
                 command.IsBehaviorStart = true;
                 //yield return StartCoroutine(AnimationManager.instance.IsBehaviorAnimationCoroutine(command));
                 break;

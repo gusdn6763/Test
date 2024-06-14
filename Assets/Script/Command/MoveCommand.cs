@@ -47,29 +47,41 @@ public class MoveCommand : VillageCommand
         }
     }
 
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (CurrentArea is IMoveableArea)
+        {
+            onAnimationEndEvent += (status) =>
+            {
+                if (status == MouseStatus.Excute)
+                    (CurrentArea as IMoveableArea).MoveLocation(this);
+            };
+        }
+    }
+
     public override void Interaction(MouseStatus mouseStatus)
     {
         base.Interaction(mouseStatus);
 
-        if (mouseStatus == MouseStatus.Excute)
+        if (mouseStatus == MouseStatus.Enter)
+        {
+            if (alternativeLocation)
+                Player.instance.ShowPreviewStatus(alternativeLocation.currentStatus, alternativeLocation.CommandName);
+            else
+                Player.instance.ShowPreviewStatus(currentStatus, CommandName);
+        }
+        else if (mouseStatus == MouseStatus.Exit)
+        {
+            Player.instance.StopPreviewStatus();
+        }
+        else if (mouseStatus == MouseStatus.Excute)
         {
             if (alternativeLocation)
                 Player.instance.SetStatus(alternativeLocation.MyStatus);
             else
                 Player.instance.SetStatus(MyStatus);
         }
-    }
-
-    private void OnMouseEnter()
-    {
-        if (alternativeLocation)
-            Player.instance.ShowPreviewStatus(alternativeLocation.currentStatus, alternativeLocation.CommandName);
-        else
-            Player.instance.ShowPreviewStatus(currentStatus, CommandName);
-    }
-
-    private void OnMouseExit()
-    {
-        Player.instance.StopPreviewStatus();
     }
 }

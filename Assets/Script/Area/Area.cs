@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class Area : MonoBehaviour
 {
     private List<MultiTreeCommand> commands = new List<MultiTreeCommand>();
 
     public bool IsWait = false;
+    public bool start = false;
 
     public virtual void AddCommand(MultiTreeCommand command)
     {
@@ -26,6 +28,15 @@ public class Area : MonoBehaviour
         }
     }
 
+    public void ActiveOnOff(bool isOn)
+    {
+        for (int i = 0; i < commands.Count; i++)
+        {
+            commands[i].collisionBox.isTrigger = !isOn;
+        }
+        enabled = isOn;
+    }
+
     public Vector3 FindSpawnPosition(MultiTreeCommand multiTreeCommand)
     {
         Vector3 position;
@@ -39,7 +50,7 @@ public class Area : MonoBehaviour
 
         return position;
     }
-    public Vector3 GetRandomPosition(Vector3 size)
+    public virtual Vector3 GetRandomPosition(Vector3 size)
     {
         float z = transform.position.z;
 
@@ -56,5 +67,11 @@ public class Area : MonoBehaviour
         Collider[] colliders = Physics.OverlapBox(position, size / 2f);
 
         return colliders.Length > 0;
+    }
+
+    public virtual void SetItem(ItemCommand item, bool random = true)
+    {
+        item.transform.SetParent(transform);
+        item.transform.position = FindSpawnPosition(item);
     }
 }

@@ -28,7 +28,7 @@ public class MultiTreeCommand : MonoBehaviour
     [HideInInspector] public MenuList menuList;
 
     public Interaction interaction;
-    protected BoxCollider collisionBox;
+    [HideInInspector] public BoxCollider collisionBox;
     protected TextMeshPro text;
     protected RectTransform rect; 
 
@@ -59,7 +59,13 @@ public class MultiTreeCommand : MonoBehaviour
 
         text = GetComponent<TextMeshPro>();
         rect = GetComponent<RectTransform>();
-        collisionBox = GetComponent<BoxCollider>();
+
+        if (IsRootCommand)
+        {
+            if (CurrentArea)
+                CurrentArea.AddCommand(this);
+            collisionBox = GetComponent<BoxCollider>();
+        }
 
         IsFirstAppearance = true;
 
@@ -67,7 +73,7 @@ public class MultiTreeCommand : MonoBehaviour
         SetSize(GetSize(true));
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         if (interaction)        
             interaction.SetSize(GetSize(false));

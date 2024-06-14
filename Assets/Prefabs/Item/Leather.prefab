@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 2033239507872577109}
   - component: {fileID: 7379821099715927141}
   - component: {fileID: 9158708965550669936}
+  - component: {fileID: -6888698069862776069}
   m_Layer: 6
   m_Name: Leather
   m_TagString: Untagged
@@ -315,9 +316,13 @@ MonoBehaviour:
   spriteList: {fileID: 0}
   menuList: {fileID: 0}
   interaction: {fileID: 0}
+  collisionBox: {fileID: 0}
   padding: {x: 0, y: 0.2}
   commandName: "\uAC00\uC8FD"
   isCondition: 1
+  commands:
+  - {fileID: 8179418690217667613}
+  - {fileID: 8617903377877875808}
 --- !u!114 &7379821099715927141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -345,6 +350,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animationData: {fileID: 11400000, guid: 86cac7bec2fea58469f9c5c3b3c11579, type: 2}
+--- !u!114 &-6888698069862776069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1351099080219135502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84cdecc661fdf0143a4e17ec848ef9d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2668188703999194243
 GameObject:
   m_ObjectHideFlags: 0
@@ -520,6 +537,7 @@ GameObject:
   - component: {fileID: 8617903377877875808}
   - component: {fileID: 5349101867451980117}
   - component: {fileID: 7295207295787568268}
+  - component: {fileID: 5712640217636146273}
   m_Layer: 6
   m_Name: Throw
   m_TagString: Untagged
@@ -696,9 +714,11 @@ MonoBehaviour:
   spriteList: {fileID: 0}
   menuList: {fileID: 0}
   interaction: {fileID: 0}
+  collisionBox: {fileID: 0}
   padding: {x: 0, y: 0}
   commandName: "\uBC84\uB9AC\uAE30"
   isCondition: 1
+  commands: []
 --- !u!114 &5349101867451980117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -724,6 +744,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 662499052f3e1cd478b2cd7e74439db5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5712640217636146273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5332447786399797106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b53160b1470b554f96eef7a2b7f8602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  test:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2033239507872577109}
+        m_TargetAssemblyTypeName: ItemCommand, Assembly-CSharp
+        m_MethodName: Throw
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6100226491360703053
 GameObject:
   m_ObjectHideFlags: 0
@@ -846,7 +893,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.695, y: 0.27499998}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &9206999275412975720
@@ -987,6 +1034,7 @@ GameObject:
   - component: {fileID: 8179418690217667613}
   - component: {fileID: 5919868728420006627}
   - component: {fileID: 1432484755039273882}
+  - component: {fileID: 7203796714044275738}
   m_Layer: 6
   m_Name: Get
   m_TagString: Untagged
@@ -1163,9 +1211,11 @@ MonoBehaviour:
   spriteList: {fileID: 0}
   menuList: {fileID: 0}
   interaction: {fileID: 0}
+  collisionBox: {fileID: 0}
   padding: {x: 0, y: 0}
   commandName: "\uC90D\uAE30"
   isCondition: 1
+  commands: []
 --- !u!114 &5919868728420006627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1191,3 +1241,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 662499052f3e1cd478b2cd7e74439db5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7203796714044275738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8999404764277235476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b53160b1470b554f96eef7a2b7f8602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  test:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2033239507872577109}
+        m_TargetAssemblyTypeName: ItemCommand, Assembly-CSharp
+        m_MethodName: Get
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
